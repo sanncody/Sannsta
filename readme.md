@@ -1,1 +1,2 @@
-HQ instagram clone
+# Sannsta
+This is the social media project.
