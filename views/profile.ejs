@@ -1,7 +1,7 @@
 <% include ./partials/header.ejs %>
   <div class="w-full min-h-screen bg-zinc-900 text-white py-5">
     <div class="nav flex justify-between items-center px-4">
-      <h3 class="text-lg"><%= user.name %></h3>
+      <h3 class="text-xl tracking-tight font-semibold"><%= user.name %></h3>
       <div class="icons flex gap-5">
         <a href="/upload"><i class="text-[1.4rem] ri-add-box-line"></i></a>
         <i class="text-[1.4rem] ri-menu-line"></i>
@@ -32,16 +32,11 @@
         <%= user.bio %>
       </p>
     </div>
-    <div class="px-6 mt-5">
-      <a class="px-3 py-2 bg-zinc-800 text-xs rounded-md" href="/edit">Edit Profile</a>
+    <div class="px-6 mt-7">
+      <a class="px-5 py-2 bg-zinc-800 text-md rounded-md" href="/edit">Edit Profile</a>
     </div>
     <div class="posts w-full flex justify-between gap-1 py-2 mt-5 flex-wrap">
-      <div class="post w-[32.5%] h-32 bg-sky-100"></div>
-      <div class="post w-[32.5%] h-32 bg-sky-100"></div>
-      <div class="post w-[32.5%] h-32 bg-sky-100"></div>
-      <div class="post w-[32.5%] h-32 bg-sky-100"></div>
-      <div class="post w-[32.5%] h-32 bg-sky-100"></div>
-      <div class="post w-[32.5%] h-32 bg-sky-100"></div>
+      <%  %>
     </div>
   </div>
   <% include ./partials/footer.ejs %>

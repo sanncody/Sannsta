@@ -6,6 +6,7 @@ const router = express.Router();
 
 const userModel = require('../models/userModel');
 const upload = require('../config/multer');
+const postModel = require('../models/postModel');
 
 
 passport.use(new localStrategy(userModel.authenticate()));
@@ -18,8 +19,9 @@ router.get('/login', function (req, res) {
   res.render('login', { footer: false });
 });
 
-router.get('/feed', isLoggedIn, function (req, res) {
-  res.render('feed', { footer: true });
+router.get('/feed', isLoggedIn, async function (req, res) {
+  const posts = await postModel.find().limit(30).populate('user');
+  res.render('feed', { posts, footer: true });
 });
 
 router.get('/profile', isLoggedIn, async function (req, res) {
@@ -41,7 +43,7 @@ router.get('/upload', isLoggedIn, function (req, res) {
 });
 
 router.post('/register', function (req, res) {
-  const { name, username, email, profileImage, password } = req.body;
+  const { name, username, email, password } = req.body;
 
   const userData = new userModel({
     name,
@@ -69,13 +71,28 @@ router.post('/edit', upload.single('profilePic'), async function (req, res) {
     { username, name, bio },
     { new: true }
   );
-  console.log(req.file.filename);
+
   if (req.file) {
     user.profileImage = req.file.filename;
   }
+
   await user.save();
-  
   res.redirect('/profile');
+});
+
+router.post('/upload', isLoggedIn, upload.single('postImage'), async function (req, res) {
+  const user = await userModel.findOne({ _id: req.session.passport.user });
+
+  const createdPost = await postModel.create({
+    caption: req.body.caption,
+    postImage: req.file?.filename,
+    user: user._id
+  });
+
+  user.posts.push(createdPost._id);
+  await user.save();
+
+  res.redirect('/feed');
 });
 
 router.get('/logout', function (req, res, next) {
