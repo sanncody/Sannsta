@@ -80,7 +80,7 @@
                   <h4 class="text-sm">
                     <%= post.user.username %>
                   </h4>
-                  <h6 class="text-xs opacity-30">post.createdAt</h6>
+                  <h6 class="text-xs opacity-30"><%= post.createdAt.toISOString().split('T')[0] %></h6>
                 </div>
                 <div class="w-full h-96 mt-4 bg-sky-100 overflow-hidden">
                   <img src="/images/uploads/<%= post.postImage %>" alt="" class="w-full h-full rounded-full">

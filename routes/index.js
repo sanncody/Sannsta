@@ -34,6 +34,19 @@ router.get('/search', isLoggedIn, function (req, res) {
   res.render('search', { footer: true });
 });
 
+router.get('/username/:username', async function (req, res) {
+  const searchTerm = new RegExp(`^${req.params.username}`, 'i');
+  const users = await userModel.find({ username: searchTerm });
+
+  res.status(200).json(users);
+});
+
+router.get('/users', isLoggedIn, async function (req, res) {
+  const users = await userModel.findOne({ _id: req.session.passport.user });
+
+  res.status(200).json(users);
+});
+
 router.get('/edit', isLoggedIn, async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
   res.render('edit', { user, footer: true });
@@ -54,13 +67,13 @@ router.post('/register', function (req, res) {
 
   userModel.register(userData, password).then(function (registeredUser) {
     passport.authenticate('local')(req, res, function () {
-      res.redirect('/profile');
+      res.redirect('/feed');
     });
   })
 });
 
 router.post('/login', passport.authenticate('local', {
-  successRedirect: "/profile",
+  successRedirect: "/feed",
   failureRedirect: "/"
 }), function (req, res) {});
 
