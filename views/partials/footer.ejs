@@ -3,14 +3,29 @@
     <a href="/feed"><i class="text-[1.4rem] ri-home-line"></i></a>
     <a href="/search"><i class="text-[1.4rem] ri-search-line"></i></a>
     <a href="/upload"><i class="text-[1.4rem] ri-add-box-line"></i></a>
-    <a href="/profile">
-      <div class="w-6 h-6 bg-zinc-300 rounded-full overflow-hidden">
-        <img src="https://avatars.githubusercontent.com/u/68498988?v=4" class="w-full h-full rounded-full">
-      </div>
+    <a href="/profile" id="profile">
+
     </a>
   </div>
 <% } %>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
+    integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    const profile = document.querySelector('#profile');
+
+    let clutter = '';
+    axios.get('/users').then(function (user) {
+      clutter = `
+          <div class="w-6 h-6 bg-zinc-300 rounded-full overflow-hidden">
+            <img src=/images/uploads/${user.data.profileImage} class="w-full h-full rounded-full">
+          </div>
+        `;
+
+      profile.innerHTML = clutter;
+    });
+  </script>
 
 </body>
 </html>
