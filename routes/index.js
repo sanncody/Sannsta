@@ -7,6 +7,7 @@ const router = express.Router();
 const userModel = require('../models/userModel');
 const upload = require('../config/multer');
 const postModel = require('../models/postModel');
+const dateFormatter = require('../utils/dateFormatter');
 
 
 passport.use(new localStrategy(userModel.authenticate()));
@@ -20,8 +21,9 @@ router.get('/login', function (req, res) {
 });
 
 router.get('/feed', isLoggedIn, async function (req, res) {
+  const user = await userModel.findOne({ _id: req.session.passport.user });
   const posts = await postModel.find().limit(30).populate('user');
-  res.render('feed', { posts, footer: true });
+  res.render('feed', { user, posts, footer: true, formatDate: dateFormatter.formatRelativeTime });
 });
 
 router.get('/profile', isLoggedIn, async function (req, res) {
@@ -39,6 +41,25 @@ router.get('/username/:username', async function (req, res) {
   const users = await userModel.find({ username: searchTerm });
 
   res.status(200).json(users);
+});
+
+router.get('/like/post/:postId', isLoggedIn, async function (req, res) {
+  // We got logged in user
+  const user = await userModel.findOne({ _id: req.session.passport.user });
+
+  // Logged in user liking the post
+  const post = await postModel.findOne({ _id: req.params.postId });
+
+  // If already liked, remove like and if not liked, then like the post
+  if (post.likes.indexOf(user._id) === -1) {
+    post.likes.push(user._id);
+  } else {
+    post.likes.splice(post.likes.indexOf(user._id), 1);
+  }
+
+  await post.save();
+
+  res.redirect('/feed');
 });
 
 router.get('/users', isLoggedIn, async function (req, res) {
