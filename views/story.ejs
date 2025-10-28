@@ -3,18 +3,18 @@
     <div class="relative w-full min-h-screen bg-black">
         <!-- Progress bars -->
         <div class="absolute top-4 left-3 right-3 flex gap-1 z-20">
-            <% if (user.stories && user.stories.length > 0) { %>
+            <% if (user.stories && user.stories.length> 0) { %>
                 <% user?.stories.forEach((story, index)=> { %>
                     <div class="flex-1 h-[3px] bg-gray-600 overflow-hidden rounded-full">
-                        <div id="bar-<%= index %>" class="h-full bg-white w-0"></div>
+                        <div id="bar-<%= index %>" class="w-0 h-full bg-white"></div>
                     </div>
-                <% }) %>
-            <% } else { %>
-                <div class="mx-auto ">
-                    <h1 class="opacity-30 font-semibold text-[#dadada]">No
-                        Stories posted yet...</h1>
-                </div>
-            <% } %>
+                    <% }) %>
+                        <% } else { %>
+                            <div class="mx-auto ">
+                                <h1 class="opacity-30 font-semibold text-[#dadada]">No
+                                    Stories posted yet...</h1>
+                            </div>
+                            <% } %>
         </div>
 
         <!-- Close icon -->
@@ -35,7 +35,7 @@
         <% user.stories.forEach((story, index)=> { %>
             <img src="/images/uploads/<%= story.story %>" id="story-<%= index %>" class="w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-300
                       <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" alt="story">
-        <% }) %>
+            <% }) %>
     </div>
 
     <script>
@@ -49,29 +49,29 @@
                 story.style.opacity = i === index ? '1' : '0';
             });
 
-            // Reset all bars before animating the current one
+            // Reset bars: filled ones stay white but not re-animated, future ones stay 0
             bars.forEach((bar, i) => {
                 bar.style.transition = 'none';
-                bar.style.width = i < index ? '100%' : '0%';
+                if (i < index) bar.style.width = '100%';
+                else bar.style.width = '0%';
             });
 
-            // Animate current bar
-            requestAnimationFrame(() => {
+            // Animate only current bar (start from 0)
+            setTimeout(() => {
                 bars[index].style.transition = `width ${duration / 1000}s linear`;
                 bars[index].style.width = '100%';
-            });
+            }, 50);
 
-            // Move to next story after duration
+            // Proceed to next story after duration
             setTimeout(() => {
                 if (index < stories.length - 1) {
-                    current++;
-                    showStory(current);
+                    showStory(index + 1);
                 } else {
-                    window.history.back();
+                    window.history.back(); // end reached
                 }
             }, duration);
         }
-        showStory(0);
+        if (stories.length > 0) showStory(current);
     </script>
 
     <% include ./partials/footer.ejs %>

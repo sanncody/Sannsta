@@ -67,8 +67,8 @@
                 <%= formatDate(new Date(post.createdAt)) %>
               </h6>
             </div>
-            <div class="w-full h-96 mt-4 bg-sky-100 overflow-hidden">
-              <img src="/images/uploads/<%= post.postImage %>" alt="" class="w-full h-full rounded-full">
+            <div class="w-[96%] h-100 mt-4 mx-auto bg-sky-100 overflow-hidden">
+              <img src="/images/uploads/<%= post.postImage %>" alt="" class="w-full h-full object-cover object-center">
             </div>
             <div class="options w-full px-4 flex justify-between items-center text-[1.4rem]">
               <div class="flex gap-3 mt-2">
@@ -92,9 +92,9 @@
             </h2>
           </div>
           <% }) %>
-            <% } else { %>
-              <h3 class="text-zinc-300 text-xl mt-20 opacity-30 ml-5 font-semibold">No Posts yet ...</h3>
-              <% } %>
+      <% } else { %>
+          <h3 class="text-zinc-300 text-xl mt-20 opacity-30 ml-5 font-semibold">No Posts yet ...</h3>
+      <% } %>
     </div>
   </div>
 
@@ -108,8 +108,8 @@
       localStorage.setItem('scrollpos', window.scrollY);
     };
 
+    // Rotating outer circle of story using animation
     const rotatingRing = document.querySelectorAll('.rotating-ring');
-
     rotatingRing.forEach(ring => {
       const ringBorder = ring.querySelector('.ring-border');
       ring.addEventListener('click', () => {
