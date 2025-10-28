@@ -1,5 +1,5 @@
 <% include ./partials/header.ejs %>
-  <div class="w-full min-h-screen bg-zinc-900 text-white py-5">
+  <div class="w-full min-h-screen bg-zinc-900 text-white py-5 overflow-hidden">
     <div class="nav flex justify-between items-center px-4">
       <h3 class="text-xl tracking-tight font-semibold">
         <%= user.name %>
@@ -40,11 +40,11 @@
       <a class="px-5 py-2 bg-zinc-800 text-md rounded-md" href="/edit">Edit Profile</a>
       <a class="px-5 py-2 bg-red-500 text-md rounded-md ml-2" href="/logout">Logout</a>
     </div>
-    <div class="posts w-full flex gap-1 py-2 mt-5 flex-wrap">
+    <div class="posts w-full flex gap-2 py-2 mt-5 ml-5 flex-wrap">
       <% if (user.posts.length> 0) { %>
         <% user.posts.forEach(post=> { %>
-          <div class="post w-[32.5%] h-32 bg-sky-100 overflow-hidden">
-            <img src="/images/uploads/<%= post.postImage %>" alt="" class="w-full h-full object-cover">
+          <div class="post w-40 h-40 bg-sky-100 overflow-hidden">
+            <img src="/images/uploads/<%= post.postImage %>" alt="" class="w-full h-full object-cover object-top">
           </div>
         <% }) %>
       <% } else { %>

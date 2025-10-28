@@ -29,20 +29,24 @@
       </div>
     </div>
     <div class="story px-3 flex gap-3 overflow-auto mt-5">
-      <a href="/story/<%= user.username %>">
-        <div class="rotating-ring circle flex-shrink-0 relative w-[18vw] h-[18vw]">
-
-          <!-- Rotating gradient ring -->
-          <div class="ring-border absolute inset-0 rounded-full"
-            style="background: conic-gradient(from 0deg, #8b5cf6, #ec4899, #f97316, #8b5cf6); padding: 3px;">
-          </div>
-
-          <!-- Static inner circle (profile image) -->
-          <div class="absolute inset-[3px] rounded-full overflow-hidden bg-black">
-            <img class="w-full h-full object-cover object-top" src="/images/uploads/<%= user.profileImage %>" alt="">
-          </div>
-        </div>
-      </a>
+      <% if (stories.length > 0 ) { %>
+        <% stories.forEach(story => { %>
+          <a href="/story/<%= story.user.username %>">
+            <div class="rotating-ring circle flex-shrink-0 relative w-[18vw] h-[18vw]">
+          
+              <!-- Rotating gradient ring -->
+              <div class="ring-border absolute inset-0 rounded-full"
+                style="background: conic-gradient(from 0deg, #8b5cf6, #ec4899, #f97316, #8b5cf6); padding: 3px;">
+              </div>
+          
+              <!-- Static inner circle (profile image) -->
+              <div class="absolute inset-[3px] rounded-full overflow-hidden bg-black">
+                <img class="w-full h-full object-cover object-top" src="/images/uploads/<%= story.user.profileImage %>" alt="">
+              </div>
+            </div>
+          </a>
+        <% }) %>
+      <% } %>
     </div>
     <div class="posts mb-20">
       <% if (posts.length> 0) { %>

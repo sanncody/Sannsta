@@ -23,13 +23,15 @@
         </button>
 
         <!-- User info -->
-        <div class="absolute top-10 left-3 flex items-center gap-2 z-20 overflow-hidden">
-            <img src="/images/uploads/<%= user.profileImage %>"
-                class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="user">
-            <span class="text-[#dadada] font-medium capitalize text-lg font-semibold">
-                <%= user.username %>
-            </span>
-        </div>
+        <a href="/profile/">
+            <div class="absolute top-10 left-3 flex items-center gap-2 z-20 overflow-hidden">
+                <img src="/images/uploads/<%= user.profileImage %>"
+                    class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="user">
+                <span class="text-[#dadada] font-medium capitalize text-lg font-semibold">
+                    <%= user.username %>
+                </span>
+            </div>
+        </a>
 
         <!-- Story images -->
         <% user.stories.forEach((story, index)=> { %>

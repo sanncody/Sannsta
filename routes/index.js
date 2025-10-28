@@ -27,11 +27,13 @@ router.get('/feed', isLoggedIn, async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
   const posts = await postModel.find().limit(30).populate('user');
   
-  const stories = await storyModel.find({ user: { $ne: user._id } })
-    .populate("user");
+  const stories = await storyModel.find().populate("user");
 
-
-  res.render('feed', { user, posts, footer: true, formatDate: dateFormatter.formatRelativeTime });
+  const uniqueStories = stories.filter((story, index, self) =>
+    index === self.findIndex(s => s.user._id.toString() === story.user._id.toString())
+  );
+  
+  res.render('feed', { user, posts, stories: uniqueStories, footer: true, formatDate: dateFormatter.formatRelativeTime });
 });
 
 router.get('/story/add', isLoggedIn, async function (req, res) {
@@ -48,14 +50,23 @@ router.get('/story/:username', async function (req, res) {
 router.get('/profile', isLoggedIn, async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
   await user.populate('posts');
+  await user.populate('savedPosts');
+
+  console.log(user);
   res.render('profile', { user, footer: true });
 });
 
-// router.get('/profile/:username', async function (req, res) {
-//   const user = await userModel.findOne({ username: req.params.username });
+router.get('/profile/:username', isLoggedIn, async function (req, res) {
+  const user = await userModel.findOne({ _id: req.session.passport.user });
 
-//   res.redirect(`/profile`);
-// });
+  if (user.username === req.params.username) {
+    res.redirect('/profile');
+  }
+
+  let userProfile = await userModel.findOne({ username: req.params.username }).populate("posts");
+
+  res.render('userProfile', { user, userProfile, footer: true });
+});
 
 router.get('/search', isLoggedIn, function (req, res) {
   res.render('search', { footer: true });
