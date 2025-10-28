@@ -8,9 +8,12 @@ const userModel = require('../models/userModel');
 const upload = require('../config/multer');
 const postModel = require('../models/postModel');
 const dateFormatter = require('../utils/dateFormatter');
+const storyModel = require('../models/storyModel');
 
 
 passport.use(new localStrategy(userModel.authenticate()));
+
+// NOTE: We can populate only those fields in which id is saved as "mongoose.Schema.Types.ObjectId"
 
 router.get('/', function (req, res) {
   res.render('index', { footer: false });
@@ -23,14 +26,36 @@ router.get('/login', function (req, res) {
 router.get('/feed', isLoggedIn, async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
   const posts = await postModel.find().limit(30).populate('user');
+  
+  const stories = await storyModel.find({ user: { $ne: user._id } })
+    .populate("user");
+
+
   res.render('feed', { user, posts, footer: true, formatDate: dateFormatter.formatRelativeTime });
 });
+
+router.get('/story/add', isLoggedIn, async function (req, res) {
+  const user = await userModel.findOne({ _id: req.session.passport.user });
+  res.render('uploadStory', { user, footer: true });
+});
+
+router.get('/story/:username', async function (req, res) {
+  const user = await userModel.findOne({ username: req.params.username }).populate('stories');
+  res.render('story', { user, footer: false });
+});
+
 
 router.get('/profile', isLoggedIn, async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
   await user.populate('posts');
   res.render('profile', { user, footer: true });
 });
+
+// router.get('/profile/:username', async function (req, res) {
+//   const user = await userModel.findOne({ username: req.params.username });
+
+//   res.redirect(`/profile`);
+// });
 
 router.get('/search', isLoggedIn, function (req, res) {
   res.render('search', { footer: true });
@@ -117,17 +142,33 @@ router.post('/edit', upload.single('profilePic'), async function (req, res) {
 
 router.post('/upload', isLoggedIn, upload.single('postImage'), async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
-
+  
   const createdPost = await postModel.create({
     caption: req.body.caption,
     postImage: req.file?.filename,
     user: user._id
   });
-
+  
   user.posts.push(createdPost._id);
   await user.save();
-
+  
   res.redirect('/feed');
+});
+
+router.post('/story/upload', isLoggedIn, upload.single('story'), async function (req, res) {
+  const user = await userModel.findOne({ _id: req.session.passport.user });
+
+  const story = await storyModel.create({
+    user: user._id,
+    story: req.file?.filename
+  });
+
+  user.stories.push(story._id);
+
+  await user.save();
+
+  res.redirect(`/story/${user.username}`);
+  
 });
 
 router.get('/logout', function (req, res, next) {

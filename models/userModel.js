@@ -13,7 +13,31 @@ const userSchema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'post'
         }
-    ]
+    ],
+    stories: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'story'
+        }
+    ],
+    savedPosts: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "post"
+        }
+    ],
+    followers: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'user'
+        }
+    ],
+    following: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'user'
+        }
+    ],
 });
 
 userSchema.plugin(plm);

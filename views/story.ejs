@@ -1,0 +1,77 @@
+<% include ./partials/header.ejs %>
+
+    <div class="relative w-full min-h-screen bg-black">
+        <!-- Progress bars -->
+        <div class="absolute top-4 left-3 right-3 flex gap-1 z-20">
+            <% if (user.stories && user.stories.length > 0) { %>
+                <% user?.stories.forEach((story, index)=> { %>
+                    <div class="flex-1 h-[3px] bg-gray-600 overflow-hidden rounded-full">
+                        <div id="bar-<%= index %>" class="h-full bg-white w-0"></div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="mx-auto ">
+                    <h1 class="opacity-30 font-semibold text-[#dadada]">No
+                        Stories posted yet...</h1>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Close icon -->
+        <button onclick="window.history.back()" class="absolute top-4 right-4 text-white text-2xl z-20">
+            <i class="ri-close-line"></i>
+        </button>
+
+        <!-- User info -->
+        <div class="absolute top-10 left-3 flex items-center gap-2 z-20 overflow-hidden">
+            <img src="/images/uploads/<%= user.profileImage %>"
+                class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="user">
+            <span class="text-[#dadada] font-medium capitalize text-lg font-semibold">
+                <%= user.username %>
+            </span>
+        </div>
+
+        <!-- Story images -->
+        <% user.stories.forEach((story, index)=> { %>
+            <img src="/images/uploads/<%= story.story %>" id="story-<%= index %>" class="w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-300
+                      <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" alt="story">
+        <% }) %>
+    </div>
+
+    <script>
+        const stories = document.querySelectorAll('[id^="story-"]');
+        const bars = document.querySelectorAll('[id^="bar-"]');
+        let current = 0;
+        const duration = 5000; // 5 seconds per story
+
+        function showStory(index) {
+            stories.forEach((story, i) => {
+                story.style.opacity = i === index ? '1' : '0';
+            });
+
+            // Reset all bars before animating the current one
+            bars.forEach((bar, i) => {
+                bar.style.transition = 'none';
+                bar.style.width = i < index ? '100%' : '0%';
+            });
+
+            // Animate current bar
+            requestAnimationFrame(() => {
+                bars[index].style.transition = `width ${duration / 1000}s linear`;
+                bars[index].style.width = '100%';
+            });
+
+            // Move to next story after duration
+            setTimeout(() => {
+                if (index < stories.length - 1) {
+                    current++;
+                    showStory(current);
+                } else {
+                    window.history.back();
+                }
+            }, duration);
+        }
+        showStory(0);
+    </script>
+
+    <% include ./partials/footer.ejs %>
