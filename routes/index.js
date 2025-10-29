@@ -46,7 +46,6 @@ router.get('/story/:username', async function (req, res) {
   res.render('story', { user, footer: false });
 });
 
-
 router.get('/profile', isLoggedIn, async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
   await user.populate('posts');
@@ -66,6 +65,63 @@ router.get('/profile/:username', isLoggedIn, async function (req, res) {
   let userProfile = await userModel.findOne({ username: req.params.username }).populate("posts");
 
   res.render('userProfile', { user, userProfile, footer: true });
+});
+
+/**
+ * 1. Follower
+→ The user who follows someone else.
+(Example: If I follow Karan, I am the follower.)
+
+So, the follower will have the followee’s ID (Karan's ID) inside their .following array.
+
+
+2. Followee (or the user being followed)
+
+→ The user who is being followed.
+(Example: Karan is the followee because I followed him.)
+
+So, the followee will have the follower’s ID (mine's ID) inside their .followers array.
+
+ */
+
+router.get('/follow/:userId', isLoggedIn, async function (req, res) {
+  // Current logged-in user → Follower (the one who follows)
+  let follower = await userModel.findOne({ _id: req.session.passport.user });
+
+  // The user being followed → Followee
+  let followee = await userModel.findOne({ _id: req.params.userId });
+
+  // If follower already follows the followee, then unfollow
+  if (follower.following.indexOf(followee.id) !== -1) {
+    // Remove followee from follower's following list
+    follower.following.splice(follower.following.indexOf(followee.id), 1);
+
+    // Remove follower from followee's followers list
+    followee.followers.splice(followee.followers.indexOf(follower._id), 1);
+  } else {
+    // Otherwise, start following
+    follower.following.push(followee._id);
+    followee.followers.push(follower._id);
+  }
+
+  await follower.save();
+  await followee.save();
+
+  res.redirect('back');
+});
+
+router.get('/save/:postId', isLoggedIn, async function (req, res) {
+  const user = await userModel.findOne({ _id: req.session.passport.user });
+
+  if (user.savedPosts.indexOf(req.params.postId) !== -1) {
+    user.savedPosts.splice(user.savedPosts.indexOf(req.params.postId), 1);
+  } else {
+    user.savedPosts.push(req.params.postId);
+  }
+
+  await user.save();
+
+  res.json(user);
 });
 
 router.get('/search', isLoggedIn, function (req, res) {
@@ -134,7 +190,7 @@ router.post('/login', passport.authenticate('local', {
   failureRedirect: "/"
 }), function (req, res) {});
 
-router.post('/edit', upload.single('profilePic'), async function (req, res) {
+router.post('/edit', isLoggedIn, upload.single('profilePic'), async function (req, res) {
   const { username, name, bio } = req.body;
 
   const user = await userModel.findOneAndUpdate(

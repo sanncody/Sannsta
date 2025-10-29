@@ -1,13 +1,9 @@
 <% include ./partials/header.ejs %>
     <div class="w-full min-h-screen bg-zinc-900 text-white overflow-hidden">
-        <div class="nav flex justify-between items-center px-4">
+        <div class="nav flex justify-between items-center px-4 mt-3">
             <h3 class="text-lg font-semibold tracking-tight">
                 <%= userProfile.username %>
             </h3>
-            <div class="icons flex gap-5">
-                <a href="/upload"><i class="text-[1.4rem] ri-add-box-line"></i></a>
-                <i class="text-[1.4rem] ri-menu-line"></i>
-            </div>
         </div>
         <div class="flex justify-between items-center pl-6 pr-[12vw] mt-8">
             <div class="w-[19vw] h-[19vw] bg-sky-100 rounded-full overflow-hidden">
@@ -43,17 +39,17 @@
             </p>
         </div>
         <div class="px-6 mt-5 flex gap-1">
-            <% if(user.following.indexOf(userProfile._id)===-1){ %>
+            <% if (user.following.indexOf(userProfile._id) === -1) { %>
                 <a class="px-6 py-2 bg-blue-500 text-md rounded-md" href="/follow/<%= userProfile._id %>">Follow</a>
             <% } else { %>
                 <a class="px-6 py-2 bg-zinc-800 text-md rounded-md"
                     href="/follow/<%= userProfile._id %>">Following</a>
             <% } %>
-            <a class="px-6 py-2 ml-2 bg-zinc-800 text-md rounded-md" href="/edit">Message</a>
-            <a class="px-6 py-2 ml-2 bg-zinc-800 text-md rounded-md" href="/">Contact</a>
+            <a class="px-6 py-2 ml-2 bg-zinc-800 text-md rounded-md" href="https://www.beeper.com/" target="_blank">Message</a>
+            <a class="px-6 py-2 ml-2 bg-zinc-800 text-md rounded-md" href="https://www.whatsapp.com/" target="_blank">Contact</a>
         </div>
-        <div class="posts w-full min-h-[50vh] flex gap-2 py-2 mt-10 ml-5 flex-wrap">
-            <% if(userProfile.posts.length>0){ %>
+        <div class="posts w-full flex gap-2 py-2 mt-10 ml-5 flex-wrap mb-10">
+            <% if(userProfile.posts.length > 0) { %>
                 <% userProfile.posts.reverse().forEach(function(post){ %>
                     <div class="post w-40 h-40 bg-sky-100 overflow-hidden">
                         <img class="w-full h-full object-cover" src="/images/uploads/<%= post.postImage %>" alt="">
@@ -61,7 +57,7 @@
                     <% }) %>
                         <% } else { %>
                             <div class="w-full flex justify-center items-center min-h-[20vh]">
-                                <small class="opacity-50">no posts yet.</small>
+                                <h1 class="opacity-30 font-semibold text-[#dadada]">No Posts yet...</h1>
                             </div>
                             <% } %>
         </div>

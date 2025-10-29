@@ -29,28 +29,29 @@
       </div>
     </div>
     <div class="story px-3 flex gap-3 overflow-auto mt-5">
-      <% if (stories.length > 0 ) { %>
-        <% stories.forEach(story => { %>
+      <% if (stories.length> 0 ) { %>
+        <% stories.forEach(story=> { %>
           <a href="/story/<%= story.user.username %>">
             <div class="rotating-ring circle flex-shrink-0 relative w-[18vw] h-[18vw]">
-          
+
               <!-- Rotating gradient ring -->
               <div class="ring-border absolute inset-0 rounded-full"
                 style="background: conic-gradient(from 0deg, #8b5cf6, #ec4899, #f97316, #8b5cf6); padding: 3px;">
               </div>
-          
+
               <!-- Static inner circle (profile image) -->
               <div class="absolute inset-[3px] rounded-full overflow-hidden bg-black">
-                <img class="w-full h-full object-cover object-top" src="/images/uploads/<%= story.user.profileImage %>" alt="">
+                <img class="w-full h-full object-cover object-top" src="/images/uploads/<%= story.user.profileImage %>"
+                  alt="">
               </div>
             </div>
           </a>
-        <% }) %>
-      <% } %>
+          <% }) %>
+            <% } %>
     </div>
-    <div class="posts mb-20">
+    <div class="parent posts mb-20">
       <% if (posts.length> 0) { %>
-        <% posts.reverse().forEach(post => { %>
+        <% posts.reverse().forEach(post=> { %>
           <div class="post mt-10 w-full min-h-[50vh]">
             <div class="title px-4 flex items-center gap-2">
               <a href="/story/<%= post.user.username %>">
@@ -71,21 +72,57 @@
                 <%= formatDate(new Date(post.createdAt)) %>
               </h6>
             </div>
-            <div class="w-[96%] h-100 mt-4 mx-auto bg-sky-100 overflow-hidden">
-              <img src="/images/uploads/<%= post.postImage %>" alt="" class="w-full h-full object-cover object-center">
+            <div class="relative w-[96%] h-100 mt-4 mx-auto bg-sky-100 overflow-hidden">
+              <img data-postid="<%= post._id %>" src="/images/uploads/<%= post.postImage %>" alt=""
+                class="postimg w-full h-full object-cover object-center">
             </div>
             <div class="options w-full px-4 flex justify-between items-center text-[1.4rem]">
               <div class="flex gap-3 mt-2">
                 <a href="/like/post/<%= post._id %>">
-                  <i
-                    class="<%= post.likes.includes(user._id) ? 'ri-heart-3-fill text-red-500' : 'ri-heart-3-line' %>"></i>
+                  <% if (post.likes.indexOf(user._id)===-1) { %>
+                    <i class="heart ri-heart-3-line"></i>
+                    <% } else { %>
+                      <i class="heart ri-heart-3-fill text-red-500"></i>
+                      <% } %>
                 </a>
-                <i class="ri-chat-3-line"></i>
-                <i class="ri-share-circle-line"></i>
+                <a href="https://www.beeper.com/">
+                  <i class="ri-chat-3-line"></i>
+                </a>
+                <!-- Share Icon -->
+                <div class="relative inline-block">
+                  <i id="share-btn" class="ri-share-circle-line text-xl cursor-pointer"></i>
+
+                  <!-- Share Dialog -->
+                  <div id="share-dialog"
+                    class="hidden absolute left-1/2 mt-2 w-72 bg-zinc-900 text-white rounded-xl shadow-lg p-4 z-50 border border-zinc-700">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <h2 class="text-sm font-semibold">Share on Socials</h2>
+                        <p class="text-xs text-zinc-400 mt-1">
+                          Share this review with your friends and followers on social media to spread the word!
+                        </p>
+                      </div>
+                      <button id="close-dialog" class="text-lg leading-none">&times;</button>
+                    </div>
+
+                    <!-- Icons -->
+                    <div class="flex items-center gap-4 mt-4 text-2xl">
+                      <i class="ri-twitter-fill cursor-pointer hover:text-sky-400" data-link="twitter"></i>
+                      <i class="ri-linkedin-box-fill cursor-pointer hover:text-sky-600" data-link="linkedin"></i>
+                      <i class="ri-facebook-circle-fill cursor-pointer hover:text-blue-500" data-link="facebook"></i>
+                      <i id="copy-link" class="ri-file-copy-line cursor-pointer hover:text-green-400"></i>
+                    </div>
+                  </div>
+                </div>
+
               </div>
-              <i class="ri-bookmark-line"></i>
+              <% if (user.savedPosts.indexOf(post._id)===-1) { %>
+                <i data-postid="<%= post._id %>" class="save ri-bookmark-line"></i>
+                <% } else { %>
+                  <i data-postid="<%= post._id %>" class="save ri-bookmark-fill text-zinc-100"></i>
+                  <% } %>
             </div>
-            <h3 class="px-4 mt-2 text-sm leading-none tracking-tight">
+            <h3 class="likeval px-4 mt-2 text-sm leading-none tracking-tight">
               <%= post.likes.length %> likes
             </h3>
             <h2 class="text-white font-light text-sm mt-2">
@@ -96,15 +133,18 @@
             </h2>
           </div>
           <% }) %>
-      <% } else { %>
-          <h3 class="text-zinc-300 text-xl mt-20 opacity-30 ml-5 font-semibold">No Posts yet ...</h3>
-      <% } %>
+            <% } else { %>
+              <h3 class="text-zinc-300 text-xl mt-20 opacity-30 ml-5 font-semibold">No Posts yet ...</h3>
+              <% } %>
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+    integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function (event) {
-      var scrollpos = localStorage.getItem('scrollpos');
+      const scrollpos = localStorage.getItem('scrollpos');
       if (scrollpos) window.scrollTo(0, scrollpos);
     });
 
@@ -124,6 +164,144 @@
         }, 5000);
       });
     });
+
+    document.querySelector(".parent")
+      .addEventListener("click", function (dets) {
+        if (dets.target.classList.contains("postimg")) {
+          const post = dets.target.parentNode.parentNode;
+          const heartwithborder = post.querySelector(".heart");
+          if (heartwithborder.classList.contains("ri-heart-3-line")) {
+            heartwithborder.classList.remove("ri-heart-3-line")
+            heartwithborder.classList.add("ri-heart-3-fill")
+            heartwithborder.classList.add("text-red-500")
+            // heartwithborder.style.color = "red";
+          }
+          else {
+            heartwithborder.classList.remove("ri-heart-3-fill")
+            heartwithborder.classList.remove("text-red-500")
+            heartwithborder.classList.add("ri-heart-3-line")
+          }
+          fetch(`/like/${dets.target.dataset.postid}`)
+            .then(raw => raw.json())
+            .then(response => {
+              post.querySelector(".likeval").textContent = response.like.length + " likes"
+            })
+
+          const icon = document.createElement("i");
+          icon.classList.add("ri-heart-3-fill");
+          icon.classList.add("text-red-700", "text-6xl", 'absolute', 'top-1/2', 'left-1/2', '-translate-x-[50%]', '-translate-y-[50%]', 'z-[9]');
+          dets.target.parentNode.appendChild(icon);
+
+          gsap.from(icon, {
+            scale: .5,
+            y: 30,
+            opacity: 0,
+            ease: Expo,
+            duration: .3
+          })
+
+          gsap.to(icon, {
+            scale: 0,
+            y: -30,
+            opacity: 0,
+            duration: .3,
+            ease: Expo,
+            delay: .3,
+            onComplete: () => {
+              dets.target.parentNode.removeChild(icon);
+            }
+          })
+        }
+        else if (dets.target.classList.contains("save")) {
+          const id = dets.target.dataset.postid;
+          fetch(`/save/${id}`)
+            .then(raw => raw.json())
+            .then(result => {
+              if (!dets.target.classList.contains("ri-bookmark-line")) {
+                dets.target.classList.remove("ri-bookmark-fill", "text-zinc-100");
+                dets.target.classList.add("ri-bookmark-line")
+              }
+              else {
+                dets.target.classList.remove("ri-bookmark-line")
+                dets.target.classList.add("ri-bookmark-fill", "text-zinc-100")
+              }
+            })
+        }
+      });
+
+    const shareBtn = document.getElementById("share-btn");
+    const shareDialog = document.getElementById("share-dialog");
+    const closeDialog = document.getElementById("close-dialog");
+    const copyLink = document.getElementById("copy-link");
+
+    const socialIcons = document.querySelectorAll("[data-link]");
+
+    const baseUrl =
+      window.location.hostname === "localhost"
+        ? "http://localhost:3000"
+        : "https://sannsta.onrender.com";
+
+    shareBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      shareDialog.classList.toggle("hidden");
+    });
+
+    // Close when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!shareDialog.contains(e.target) && e.target !== shareBtn) {
+        shareDialog.classList.add("hidden");
+      }
+    });
+
+    closeDialog.addEventListener("click", () => {
+      shareDialog.classList.add("hidden");
+      resetIcons();
+    });
+
+    // Copy link functionality
+    copyLink.addEventListener("click", () => {
+      navigator.clipboard.writeText(baseUrl + window.location.pathname);
+      copyLink.classList.remove("ri-file-copy-line");
+      copyLink.classList.add("ri-check-line", "text-green-400");
+      copyLink.style.pointerEvents = "none"; // disable click
+    });
+
+    // Handle social icons
+    socialIcons.forEach((icon) => {
+      icon.addEventListener("click", () => {
+        if (icon.classList.contains("selected")) return;
+
+        icon.classList.add("selected", "opacity-50");
+        icon.style.pointerEvents = "none"; // prevent multiple clicks
+
+        const shareUrl = encodeURIComponent(baseUrl + window.location.pathname);
+        const title = encodeURIComponent(document.title);
+
+        switch (icon.dataset.link) {
+          case "twitter":
+            window.open(`https://twitter.com/intent/tweet?url=${shareUrl}&text=${title}`, "_blank");
+            break;
+          case "linkedin":
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`, "_blank");
+            break;
+          case "facebook":
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, "_blank");
+            break;
+        }
+      });
+    });
+
+    // Reset icons when dialog closes
+    function resetIcons() {
+      copyLink.classList.remove("ri-check-line", "text-green-400");
+      copyLink.classList.add("ri-file-copy-line");
+      copyLink.style.pointerEvents = "auto";
+
+      socialIcons.forEach((icon) => {
+        icon.classList.remove("selected", "opacity-50");
+        icon.style.pointerEvents = "auto";
+      });
+    }
 
   </script>
   <% include ./partials/footer.ejs %>
