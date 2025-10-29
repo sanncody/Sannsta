@@ -69,9 +69,11 @@
                 </div>
               </a>
               <div>
-                <h4 class="text-sm md:text-base font-semibold">
-                  <%= post.user.username %>
-                </h4>
+                <a href="/profile/<%= post.user.username %>">
+                  <h4 class="text-sm md:text-base font-semibold cursor-pointer">
+                    <%= post.user.username %>
+                  </h4>
+                </a>
                 <h6 class="text-xs opacity-50">
                   <%= formatDate(new Date(post.createdAt)) %>
                 </h6>
@@ -100,9 +102,9 @@
 
                 <!-- Share Dialog -->
                 <div class="relative inline-block">
-                  <i id="share-btn" class="ri-share-circle-line text-xl cursor-pointer"></i>
-                  <div id="share-dialog"
-                    class="hidden absolute left-1/2 mt-2 w-72 bg-zinc-900 text-white rounded-xl shadow-lg p-4 z-50 border border-zinc-700">
+                  <i class="share-btn ri-share-circle-line text-xl cursor-pointer"></i>
+                  <div
+                    class="share-dialog hidden absolute -bottom-10 -left-5 mt-2 w-72 bg-zinc-900 text-white rounded-xl shadow-lg p-4 z-50 border border-zinc-700">
                     <div class="flex justify-between items-start">
                       <div>
                         <h2 class="text-sm font-semibold">Share on Socials</h2>
@@ -110,23 +112,30 @@
                           Share this review with your friends and followers!
                         </p>
                       </div>
-                      <button id="close-dialog" class="text-lg leading-none">&times;</button>
+                      <button class="close-dialog text-lg leading-none">&times;</button>
                     </div>
                     <div class="flex items-center gap-4 mt-4 text-2xl">
                       <i class="ri-twitter-fill cursor-pointer hover:text-sky-400" data-link="twitter"></i>
                       <i class="ri-linkedin-box-fill cursor-pointer hover:text-sky-600" data-link="linkedin"></i>
                       <i class="ri-facebook-circle-fill cursor-pointer hover:text-blue-500" data-link="facebook"></i>
-                      <i id="copy-link" class="ri-file-copy-line cursor-pointer hover:text-green-400"></i>
+                      <i class="copy-link ri-file-copy-line cursor-pointer hover:text-green-400"></i>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <% if (user.savedPosts.indexOf(post._id)===-1) { %>
-                <i data-postid="<%= post._id %>" class="save ri-bookmark-line"></i>
-                <% } else { %>
-                  <i data-postid="<%= post._id %>" class="save ri-bookmark-fill text-zinc-100"></i>
+              
+              <div class="flex justify-center gap-5">
+                <% if (user.savedPosts.indexOf(post._id)===-1) { %>
+                  <i data-postid="<%= post._id %>" class="save ri-bookmark-line cursor-pointer"></i>
+                  <% } else { %>
+                    <i data-postid="<%= post._id %>" class="save ri-bookmark-fill text-zinc-100 cursor-pointer"></i>
+                    <% } %>
+                  <% if (user && String(user._id) === String(post.user._id)) { %>
+                      <a href="/delete/<%= post._id %>">
+                        <i class="text-red-400 hover:text-red-600 ri-delete-bin-line cursor-pointer"></i>
+                      </a>
                   <% } %>
+              </div>
             </div>
 
             <!-- Likes and Caption -->
@@ -176,108 +185,119 @@
       if (dets.target.classList.contains("postimg")) {
         const post = dets.target.closest(".post");
         const heart = post.querySelector(".heart");
+        const likeVal = post.querySelector(".likeval");
+        const postId = dets.target.dataset.postid;
 
-        if (heart.classList.contains("ri-heart-3-line")) {
-          heart.classList.replace("ri-heart-3-line", "ri-heart-3-fill");
-          heart.classList.add("text-red-500");
-        } else {
-          heart.classList.replace("ri-heart-3-fill", "ri-heart-3-line");
-          heart.classList.remove("text-red-500");
-        }
+        // Toggle heart icon visually
+        const liked = heart.classList.contains("ri-heart-3-line");
+        heart.classList.toggle("ri-heart-3-line", !liked);
+        heart.classList.toggle("ri-heart-3-fill", liked);
+        heart.classList.toggle("text-red-500", liked);
 
-        fetch(`/like/${dets.target.dataset.postid}`)
+        // Instant like count update (no delay)
+        let currentLikes = parseInt(likeVal.textContent) || 0;
+        likeVal.textContent = liked
+          ? currentLikes + 1 + " likes"
+          : currentLikes - 1 + " likes";
+
+        // Sync with backend
+        fetch(`/like/${postId}`)
           .then(res => res.json())
           .then(data => {
-            post.querySelector(".likeval").textContent = data.like.length + " likes";
-          });
+            // use the correct field name returned by backend
+            const likesArray = data.likes || [];
+            likeVal.textContent = likesArray.length + " likes";
+          })
+          .catch(err => console.error("Like update failed:", err));
 
+        // Heart animation
         const icon = document.createElement("i");
-        icon.classList.add("ri-heart-3-fill", "text-red-700", "text-6xl", "absolute", "top-1/2", "left-1/2",
-          "-translate-x-1/2", "-translate-y-1/2", "z-[9]");
+        icon.classList.add(
+          "ri-heart-3-fill",
+          "text-red-700",
+          "text-6xl",
+          "absolute",
+          "top-1/2",
+          "left-1/2",
+          "-translate-x-1/2",
+          "-translate-y-1/2",
+          "z-[9]"
+        );
         dets.target.parentNode.appendChild(icon);
 
-        gsap.fromTo(icon, { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .3 });
+        gsap.fromTo(icon, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3 });
         gsap.to(icon, {
           scale: 0,
           opacity: 0,
-          duration: .4,
-          delay: .4,
-          onComplete: () => icon.remove()
+          duration: 0.4,
+          delay: 0.4,
+          onComplete: () => icon.remove(),
         });
       }
 
       // Save post
       if (dets.target.classList.contains("save")) {
         const id = dets.target.dataset.postid;
-        fetch(`/save/${id}`).then(res => res.json()).then(() => {
-          dets.target.classList.toggle("ri-bookmark-line");
-          dets.target.classList.toggle("ri-bookmark-fill");
-          dets.target.classList.toggle("text-zinc-100");
-        });
+        fetch(`/save/${id}`)
+          .then(res => res.json())
+          .then(() => {
+            dets.target.classList.toggle("ri-bookmark-line");
+            dets.target.classList.toggle("ri-bookmark-fill");
+            dets.target.classList.toggle("text-zinc-100");
+          })
+          .catch(err => console.error("Save failed:", err));
       }
     });
 
     // --- Share Dialog Logic
-    const shareBtn = document.getElementById("share-btn");
-    const shareDialog = document.getElementById("share-dialog");
-    const closeDialog = document.getElementById("close-dialog");
-    const copyLink = document.getElementById("copy-link");
-    const socialIcons = document.querySelectorAll("[data-link]");
-    const baseUrl = window.location.hostname === "localhost"
-      ? "http://localhost:3000"
-      : "https://sannsta.onrender.com";
+    document.querySelectorAll('.share-btn').forEach((btn) => {
+        const post = btn.closest('.post');
+        const dialog = post.querySelector('.share-dialog');
+        const closeBtn = dialog.querySelector('.close-dialog');
+        const copyLink = dialog.querySelector('.copy-link');
+        const socialIcons = dialog.querySelectorAll('[data-link]');
+        const baseUrl = window.location.hostname === "localhost"
+          ? "http://localhost:3000"
+          : "https://sannsta.onrender.com";
 
-    shareBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      shareDialog.classList.toggle("hidden");
-    });
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Hide all other dialogs before showing current one
+          document.querySelectorAll('.share-dialog').forEach(d => d.classList.add('hidden'));
+          dialog.classList.toggle('hidden');
+        });
 
-    document.addEventListener("click", (e) => {
-      if (!shareDialog.contains(e.target) && e.target !== shareBtn) {
-        shareDialog.classList.add("hidden");
-        resetIcons();
-      }
-    });
+        closeBtn.addEventListener('click', () => {
+          dialog.classList.add('hidden');
+        });
 
-    closeDialog.addEventListener("click", () => {
-      shareDialog.classList.add("hidden");
-      resetIcons();
-    });
+        document.addEventListener('click', (e) => {
+          if (!dialog.contains(e.target) && e.target !== btn) {
+            dialog.classList.add('hidden');
+          }
+        });
 
-    copyLink.addEventListener("click", () => {
-      navigator.clipboard.writeText(baseUrl + window.location.pathname);
-      copyLink.classList.replace("ri-file-copy-line", "ri-check-line");
-      copyLink.classList.add("text-green-400");
-      copyLink.style.pointerEvents = "none";
-    });
+        copyLink.addEventListener('click', () => {
+          navigator.clipboard.writeText(baseUrl + window.location.pathname);
+          copyLink.classList.replace('ri-file-copy-line', 'ri-check-line');
+          copyLink.classList.add('text-green-400');
+          copyLink.style.pointerEvents = 'none';
+        });
 
-    socialIcons.forEach((icon) => {
-      icon.addEventListener("click", () => {
-        if (icon.classList.contains("selected")) return;
-        icon.classList.add("selected", "opacity-50");
-        icon.style.pointerEvents = "none";
-
-        const shareUrl = encodeURIComponent(baseUrl + window.location.pathname);
-        const title = encodeURIComponent(document.title);
-
-        const links = {
-          twitter: `https://twitter.com/intent/tweet?url=${shareUrl}&text=${title}`,
-          linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`,
-          facebook: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`
-        };
-        window.open(links[icon.dataset.link], "_blank");
+        socialIcons.forEach((icon) => {
+          icon.addEventListener('click', () => {
+            const shareUrl = encodeURIComponent(baseUrl + window.location.pathname);
+            const title = encodeURIComponent(document.title);
+            const links = {
+              twitter: `https://twitter.com/intent/tweet?url=${shareUrl}&text=${title}`,
+              linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`,
+              facebook: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
+            };
+            window.open(links[icon.dataset.link], "_blank");
+          });
+        });
       });
-    });
 
-    function resetIcons() {
-      copyLink.classList.replace("ri-check-line", "ri-file-copy-line");
-      copyLink.classList.remove("text-green-400");
-      copyLink.style.pointerEvents = "auto";
-      socialIcons.forEach((icon) => {
-        icon.classList.remove("selected", "opacity-50");
-        icon.style.pointerEvents = "auto";
-      });
-    }
   </script>
 
   <% include ./partials/footer.ejs %>

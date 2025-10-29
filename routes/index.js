@@ -26,13 +26,13 @@ router.get('/login', function (req, res) {
 router.get('/feed', isLoggedIn, async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
   const posts = await postModel.find().limit(30).populate('user');
-  
+
   const stories = await storyModel.find().populate("user");
 
   const uniqueStories = stories.filter((story, index, self) =>
     index === self.findIndex(s => s.user._id.toString() === story.user._id.toString())
   );
-  
+
   res.render('feed', { user, posts, stories: uniqueStories, footer: true, formatDate: dateFormatter.formatRelativeTime });
 });
 
@@ -51,7 +51,6 @@ router.get('/profile', isLoggedIn, async function (req, res) {
   await user.populate('posts');
   await user.populate('savedPosts');
 
-  console.log(user);
   res.render('profile', { user, footer: true });
 });
 
@@ -110,8 +109,14 @@ router.get('/follow/:userId', isLoggedIn, async function (req, res) {
   res.redirect('back');
 });
 
+router.get('/save/posts', isLoggedIn, async function (req, res) {
+  const user = await userModel.findOne({ _id: req.session.passport.user }).populate('posts').populate('savedPosts');
+
+  res.render('savedPosts', { user, footer: true });
+});
+
 router.get('/save/:postId', isLoggedIn, async function (req, res) {
-  const user = await userModel.findOne({ _id: req.session.passport.user });
+  const user = await userModel.findOne({ _id: req.session.passport.user }).populate('posts');
 
   if (user.savedPosts.indexOf(req.params.postId) !== -1) {
     user.savedPosts.splice(user.savedPosts.indexOf(req.params.postId), 1);
@@ -123,6 +128,7 @@ router.get('/save/:postId', isLoggedIn, async function (req, res) {
 
   res.json(user);
 });
+
 
 router.get('/search', isLoggedIn, function (req, res) {
   res.render('search', { footer: true });
@@ -188,13 +194,13 @@ router.post('/register', function (req, res) {
 router.post('/login', passport.authenticate('local', {
   successRedirect: "/feed",
   failureRedirect: "/"
-}), function (req, res) {});
+}), function (req, res) { });
 
 router.post('/edit', isLoggedIn, upload.single('profilePic'), async function (req, res) {
   const { username, name, bio } = req.body;
 
   const user = await userModel.findOneAndUpdate(
-    { _id: req.session.passport.user }, 
+    { _id: req.session.passport.user },
     { username, name, bio },
     { new: true }
   );
@@ -209,16 +215,16 @@ router.post('/edit', isLoggedIn, upload.single('profilePic'), async function (re
 
 router.post('/upload', isLoggedIn, upload.single('postImage'), async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
-  
+
   const createdPost = await postModel.create({
     caption: req.body.caption,
     postImage: req.file?.filename,
     user: user._id
   });
-  
+
   user.posts.push(createdPost._id);
   await user.save();
-  
+
   res.redirect('/feed');
 });
 
@@ -235,7 +241,31 @@ router.post('/story/upload', isLoggedIn, upload.single('story'), async function 
   await user.save();
 
   res.redirect(`/story/${user.username}`);
-  
+});
+
+router.get('/delete/:postId', isLoggedIn, async function (req, res) {
+  const user = await userModel.findOne({ _id: req.session.passport.user });
+
+  // Find the post first
+  const post = await postModel.findById(req.params.postId);
+
+  if (!post) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+
+  // Allow delete only if the logged-in user owns the post
+  if (post.user._id.toString() !== user._id.toString()) {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
+
+  // Delete post from post collection
+  await postModel.findByIdAndDelete(req.params.postId);
+
+  // Remove from user's post list
+  await userModel.findByIdAndUpdate(user._id, { $pull: { posts: post._id } });
+
+  res.redirect('/feed');
+
 });
 
 router.get('/logout', function (req, res, next) {

@@ -1,0 +1,84 @@
+<% include ./partials/header.ejs %>
+
+    <div class="w-full min-h-screen bg-zinc-800 text-white p-5 sm:p-10">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center mb-12">
+            <a class="text-sm text-blue-500 cursor-pointer hover:text-blue-400" href="/profile">
+                <i class="ri-arrow-left-s-line"></i> Profile
+            </a>
+            <h2 class="text-blue-400 leading-none text-sm md:text-base font-semibold">Saved Posts</h2>
+            <a class="text-sm hover:text-blue-400" href="/feed">
+                <i class="ri-home-line"></i> Home
+            </a>
+        </div>
+
+        <hr class="opacity-10 mb-8 sm:mb-10 mt-5">
+
+        <% if (user.savedPosts.length===0) { %>
+            <div class="text-center text-zinc-400 mt-40">
+                <i class="ri-save-2-line text-5xl mb-5 block"></i>
+                <p class="text-lg opacity-60">You haven't saved any posts yet...</p>
+            </div>
+            <% } else { %>
+                <div class="w-full px-4 sm:px-8 md:px-12 mt-10 mb-12">
+                    <div
+                        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-5 justify-items-center">
+
+                        <% user.savedPosts.forEach(post=> { %>
+                            <div
+                                class="bg-zinc-900 w-full max-w-[20rem] rounded-xl overflow-hidden shadow-md hover:scale-[1.02] transition-transform duration-300 ease-in-out">
+
+                                <!-- Post Image -->
+                                <div class="relative w-full aspect-square bg-zinc-700 overflow-hidden">
+                                    <img src="/images/uploads/<%= post.postImage %>" alt="Saved Post"
+                                        class="w-full h-full object-cover rounded-t-xl">
+
+                                    <!-- Unsave Icon -->
+                                    <i class="unsave-btn ri-bookmark-fill absolute top-2 right-2 text-2xl text-red-600 hover:text-red-500 cursor-pointer transition"
+                                        data-postid="<%= post._id %>" title="Remove from saved"></i>
+                                </div>
+
+                                <!-- Caption & Username -->
+                                <div class="p-4 text-center">
+                                    <h3 class="text-sm sm:text-md font-bold opacity-100">@<%= user.username %>
+                                    </h3>
+                                    <p class="text-sm sm:text-base opacity-70 mt-2 tracking-tight leading-snug">
+                                        <%= post.caption %>
+                                    </p>
+                                </div>
+                            </div>
+                            <% }) %>
+
+                    </div>
+                </div>
+
+                <% } %>
+    </div>
+
+    <script>
+        // Unsave functionality
+            document.querySelectorAll('.unsave-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const postId = btn.dataset.postid;
+
+                    try {
+                        const res = await fetch(`/save/${postId}`);
+                        const data = await res.json();
+
+                        if (res.ok) {
+                            // Find the nearest card and remove it smoothly
+                            const card = btn.closest('.bg-zinc-900');
+                            if (card) {
+                                card.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-300');
+                                setTimeout(() => card.remove(), 300);
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Error unsaving post:', err);
+                    }
+                });
+            });
+
+    </script>
+
+    <% include ./partials/footer.ejs %>
