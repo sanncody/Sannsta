@@ -165,7 +165,7 @@ router.get('/edit', isLoggedIn, async function (req, res) {
   res.render('edit', { user, footer: true });
 });
 
-router.get('/upload', isLoggedIn, function (req, res) {
+router.get('/upload', isLoggedIn, async function (req, res) {
   res.render('upload', { footer: true });
 });
 

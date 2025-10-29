@@ -1,43 +1,50 @@
 <% include ./partials/header.ejs %>
-    <div class="w-full min-h-screen bg-zinc-900 px-4 py-5">
-        <div class="border-2 border-zinc-800 flex items-center justify-between px-2 py-1 rounded-md">
-            <i class="text-white ri-search-line"></i>
-            <input id="inputusername" class="ml-2 w-full bg-zinc-900 outline-none text-zinc-400" type="text"
-                placeholder="Search username">
-        </div>
-        <div class="users">
 
+    <div class="w-full min-h-screen bg-zinc-900 px-4 py-5">
+        <div class="max-w-2xl mx-auto">
+            <!-- Search Bar -->
+            <div class="border-2 border-zinc-800 flex items-center justify-between px-3 py-2 rounded-md">
+                <i class="text-white ri-search-line text-lg md:text-xl"></i>
+                <input id="inputusername"
+                    class="ml-2 w-full bg-zinc-900 outline-none text-zinc-400 text-sm md:text-base" type="text"
+                    placeholder="Search username">
+            </div>
+
+            <!-- User Results -->
+            <div class="users mt-5"></div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
         integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <script>
         const inp = document.querySelector('#inputusername');
         const searchUserContainer = document.querySelector('.users');
 
-        let searchingUsers = "";
         inp.addEventListener('input', async () => {
-            const response = await axios.get(`/username/${inp.value}`);
-            const searchedUsers = await response.data;
-            searchedUsers.forEach(user => {
-                searchingUsers = '';
-                searchingUsers += `
-                    <a href="/profile/${inp.value}" class="outline-none">
-                        <div class="text-white flex items-center gap-2 mt-5">
-                            <div class="image w-[11vw] h-[11vw] rounded-full bg-sky-100 overflow-hidden">
-                                <img src="/images/uploads/${user.profileImage}" alt="" class="w-full h-full object-cover">
-                            </div>
-                            <div class="text">
-                                <h3>${user.username}</h3>
-                                <h4 class="text-xs opacity-30 leading-none">${user.name}</h4>
-                            </div>
-                        </div>
-                    </a>
-                `;
-                searchUserContainer.innerHTML = searchingUsers;
-            });
+            try {
+                const response = await axios.get(`/username/${inp.value}`);
+                const searchedUsers = response.data;
+
+                searchUserContainer.innerHTML = searchedUsers.map(user => `
+        <a href="/profile/${user.username}" class="block outline-none">
+          <div class="text-white flex items-center gap-3 mt-5 hover:bg-zinc-800 px-3 py-2 rounded-md transition">
+            <div class="image w-[14vw] h-[14vw] md:w-[5vw] md:h-[5vw] rounded-full overflow-hidden border border-zinc-700">
+              <img src="/images/uploads/${user.profileImage}" alt="${user.username}" class="w-full h-full object-cover">
+            </div>
+            <div class="text">
+              <h3 class="font-medium capitalize">${user.username}</h3>
+              <h4 class="text-xs opacity-50 leading-none">${user.name}</h4>
+            </div>
+          </div>
+        </a>
+      `).join('');
+            } catch (error) {
+                console.error('Search error:', error);
+            }
         });
     </script>
+
     <% include ./partials/footer.ejs %>
