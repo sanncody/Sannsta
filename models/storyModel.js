@@ -6,8 +6,8 @@ const storySchema = mongoose.Schema({
         ref: "user"
     },
     story: {
-        type: String,
-        required: true
+        data: Buffer,
+        contentType: String
     },
     createdAt: {
         type: Date,
