@@ -87,7 +87,7 @@
             </div>
 
             <!-- Post Options -->
-            <div class="options w-full px-4 py-3 flex justify-between items-center text-[1.4rem]">
+            <div class="options w-full px-4 py-2 flex justify-between items-center text-[1.4rem]">
               <div class="flex gap-3">
                 <a href="/like/post/<%= post._id %>">
                   <% if (post.likes.indexOf(user._id)===-1) { %>
@@ -123,18 +123,18 @@
                   </div>
                 </div>
               </div>
-              
+
               <div class="flex justify-center gap-5">
                 <% if (user.savedPosts.indexOf(post._id)===-1) { %>
                   <i data-postid="<%= post._id %>" class="save ri-bookmark-line cursor-pointer"></i>
                   <% } else { %>
                     <i data-postid="<%= post._id %>" class="save ri-bookmark-fill text-zinc-100 cursor-pointer"></i>
                     <% } %>
-                  <% if (user && String(user._id) === String(post.user._id)) { %>
-                      <a href="/delete/<%= post._id %>">
-                        <i class="text-red-400 hover:text-red-600 ri-delete-bin-line cursor-pointer"></i>
-                      </a>
-                  <% } %>
+                      <% if (user && String(user._id)===String(post.user._id)) { %>
+                        <a href="/delete/<%= post._id %>">
+                          <i class="text-red-400 hover:text-red-600 ri-delete-bin-line cursor-pointer"></i>
+                        </a>
+                        <% } %>
               </div>
             </div>
 
@@ -142,6 +142,9 @@
             <h3 class="likeval px-4 text-sm leading-none tracking-tight">
               <%= post.likes.length %> likes
             </h3>
+            <a href="/post/<%= post._id %>" class="postview px-4 text-sm leading-none tracking-tight opacity-50">
+              View Post
+            </a>
             <h2 class="text-white font-light text-sm mt-2 px-4 pb-4">
               <span class="font-semibold pr-1">
                 <%= post.user.username %>
@@ -251,52 +254,62 @@
 
     // --- Share Dialog Logic
     document.querySelectorAll('.share-btn').forEach((btn) => {
-        const post = btn.closest('.post');
-        const dialog = post.querySelector('.share-dialog');
-        const closeBtn = dialog.querySelector('.close-dialog');
-        const copyLink = dialog.querySelector('.copy-link');
-        const socialIcons = dialog.querySelectorAll('[data-link]');
-        const baseUrl = window.location.hostname === "localhost"
-          ? "http://localhost:3000"
-          : "https://sannsta.onrender.com";
+      const post = btn.closest('.post');
+      const dialog = post.querySelector('.share-dialog');
+      const closeBtn = dialog.querySelector('.close-dialog');
+      const copyLink = dialog.querySelector('.copy-link');
+      const socialIcons = dialog.querySelectorAll('[data-link]');
+      const baseUrl = window.location.hostname === "localhost"
+        ? "http://localhost:3000"
+        : "https://sannsta.onrender.com";
 
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          // Hide all other dialogs before showing current one
-          document.querySelectorAll('.share-dialog').forEach(d => d.classList.add('hidden'));
-          dialog.classList.toggle('hidden');
-        });
+      // ✅ Get postId safely from post's image or any element with data-postid
+      const postId = post.querySelector("[data-postid]")?.dataset.postid;
 
-        closeBtn.addEventListener('click', () => {
+      // Toggle dialog visibility
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.share-dialog').forEach(d => d.classList.add('hidden'));
+        dialog.classList.toggle('hidden');
+      });
+
+      closeBtn.addEventListener('click', () => dialog.classList.add('hidden'));
+
+      document.addEventListener('click', (e) => {
+        if (!dialog.contains(e.target) && e.target !== btn) {
           dialog.classList.add('hidden');
-        });
+        }
+      });
 
-        document.addEventListener('click', (e) => {
-          if (!dialog.contains(e.target) && e.target !== btn) {
-            dialog.classList.add('hidden');
-          }
-        });
+      // ✅ Copy post link correctly
+      copyLink.addEventListener('click', () => {
+        const postUrl = `${baseUrl}/post/${postId}`;
+        navigator.clipboard.writeText(postUrl);
+        copyLink.classList.replace('ri-file-copy-line', 'ri-check-line');
+        copyLink.classList.add('text-green-400');
+        copyLink.style.pointerEvents = 'none';
+        setTimeout(() => {
+          copyLink.classList.replace('ri-check-line', 'ri-file-copy-line');
+          copyLink.classList.remove('text-green-400');
+          copyLink.style.pointerEvents = 'auto';
+        }, 1500);
+      });
 
-        copyLink.addEventListener('click', () => {
-          navigator.clipboard.writeText(baseUrl + window.location.pathname);
-          copyLink.classList.replace('ri-file-copy-line', 'ri-check-line');
-          copyLink.classList.add('text-green-400');
-          copyLink.style.pointerEvents = 'none';
-        });
-
-        socialIcons.forEach((icon) => {
-          icon.addEventListener('click', () => {
-            const shareUrl = encodeURIComponent(baseUrl + window.location.pathname);
-            const title = encodeURIComponent(document.title);
-            const links = {
-              twitter: `https://twitter.com/intent/tweet?url=${shareUrl}&text=${title}`,
-              linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`,
-              facebook: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
-            };
-            window.open(links[icon.dataset.link], "_blank");
-          });
+      // ✅ Social share links
+      socialIcons.forEach((icon) => {
+        icon.addEventListener('click', () => {
+          const shareUrl = encodeURIComponent(`${baseUrl}/post/${postId}`);
+          const title = encodeURIComponent(document.title);
+          const links = {
+            twitter: `https://twitter.com/intent/tweet?url=${shareUrl}&text=${title}`,
+            linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`,
+            facebook: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
+          };
+          window.open(links[icon.dataset.link], "_blank");
         });
       });
+    });
+
 
   </script>
 

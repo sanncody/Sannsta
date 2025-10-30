@@ -12,7 +12,8 @@
                     <% }) %>
                         <% } else { %>
                             <div class="mx-auto text-center mt-10">
-                                <h1 class="opacity-40 font-semibold text-[#dadada] text-lg">No Stories posted yet...
+                                <h1 class="opacity-40 font-semibold text-[#dadada] text-lg">
+                                    No Stories posted yet...
                                 </h1>
                             </div>
                             <% } %>
@@ -25,7 +26,7 @@
         </button>
 
         <!-- User Info -->
-        <a href="/profile/" class="absolute top-12 left-4 flex items-center gap-3 z-20">
+        <a href="/profile/<%= user.username %>" class="absolute top-14 left-4 flex items-center gap-3 z-20">
             <img src="/images/uploads/<%= user.profileImage %>"
                 class="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover" alt="user">
             <span class="text-[#dadada] font-semibold capitalize text-lg sm:text-xl tracking-tight">
@@ -33,25 +34,46 @@
             </span>
         </a>
 
-        <!-- Story Images -->
-        <% user.stories.forEach((story, index)=> { %>
-            <img src="/images/uploads/<%= story.story %>" id="story-<%= index %>" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50%] h-full object-contain sm:object-cover transition-opacity duration-300
-                                         <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" alt="story">
-        <% }) %>
 
-    </>
+        <!-- Story Images + Navigation -->
+        <% user.stories.forEach((story, index)=> { %>
+            <div class="story-container w-full h-full flex items-center justify-center">
+                <img src="/images/uploads/<%= story.story %>" id="story-<%= index %>" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+               w-[90%] sm:w-[60%] h-full object-contain sm:object-cover rounded-lg
+               transition-opacity duration-500 <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" alt="story">
+            </div>
+            <% }) %>
+
+                <!-- Navigation Buttons -->
+                <button id="prevBtn"
+                    class="absolute left-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
+                    <i class="ri-arrow-left-circle-line"></i>
+                </button>
+
+                <button id="nextBtn"
+                    class="absolute right-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
+                    <i class="ri-arrow-right-circle-line"></i>
+                </button>
+    </div>
 
     <script>
         const stories = document.querySelectorAll('[id^="story-"]');
         const bars = document.querySelectorAll('[id^="bar-"]');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
         let current = 0;
-        const duration = 5000; // 5 seconds per story
+        const duration = 5000;
+        let timer;
 
         function showStory(index) {
+            if (index < 0 || index >= stories.length) return;
+
+            // Reset current story
             stories.forEach((story, i) => {
                 story.style.opacity = i === index ? '1' : '0';
             });
 
+            // Update progress bars
             bars.forEach((bar, i) => {
                 bar.style.transition = 'none';
                 bar.style.width = i < index ? '100%' : '0%';
@@ -62,12 +84,40 @@
                 bars[index].style.width = '100%';
             }, 50);
 
-            setTimeout(() => {
-                if (index < stories.length - 1) showStory(index + 1);
-                else window.history.back();
+            // Clear previous timer
+            clearTimeout(timer);
+
+            // Auto move to next story
+            timer = setTimeout(() => {
+                if (index < stories.length - 1) {
+                    current++;
+                    showStory(current);
+                } else {
+                    window.history.back();
+                }
             }, duration);
         }
 
+        // Navigation buttons
+        nextBtn.addEventListener('click', () => {
+            clearTimeout(timer);
+            if (current < stories.length - 1) {
+                current++;
+                showStory(current);
+            } else {
+                window.history.back();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            clearTimeout(timer);
+            if (current > 0) {
+                current--;
+                showStory(current);
+            }
+        });
+
+        // Start story view
         if (stories.length > 0) showStory(current);
     </script>
 

@@ -1,0 +1,189 @@
+<% include ./partials/header.ejs %>
+
+    <div class="min-h-screen w-full bg-zinc-900 text-white flex justify-center px-4 py-6 sm:py-10 mb-4 sm:mb-10">
+        <div
+            class="post w-full max-w-7xl bg-[#1F1F1F] rounded-2xl overflow-hidden shadow-xl transition-all duration-300 mb-6 sm:mb-12">
+
+            <!-- Top Bar -->
+            <div class="flex justify-between items-center m-5">
+                <a class="text-sm text-blue-500 cursor-pointer hover:text-blue-400" href="/profile">
+                    <i class="ri-arrow-left-s-line"></i> Profile
+                </a>
+                <a class="text-sm hover:text-blue-400" href="/feed">
+                    <i class="ri-home-line"></i> Home
+                </a>
+            </div>
+
+            <!-- Header -->
+            <div class="flex items-center gap-3 px-5 py-4 border-b border-zinc-800">
+                <a href="/story/<%= post.user.username %>" class="relative w-12 h-12 flex-shrink-0">
+                    <div class="absolute inset-0 rounded-full"
+                        style="background: conic-gradient(from 0deg, #8b5cf6, #ec4899, #f97316, #8b5cf6); padding: 2px;">
+                    </div>
+                    <div class="absolute inset-[2px] rounded-full overflow-hidden bg-black">
+                        <img src="/images/uploads/<%= post.user.profileImage %>" alt="Profile"
+                            class="w-full h-full rounded-full object-cover">
+                    </div>
+                </a>
+                <div>
+                    <a href="/profile/<%= post.user.username %>">
+                        <h4 class="text-base font-semibold hover:text-blue-400 transition">
+                            <%= post.user.username %>
+                        </h4>
+                    </a>
+                    <p class="text-xs text-zinc-400">
+                        <%= formatDate(new Date(post.createdAt)) %>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Post Image -->
+            <div class="w-full flex justify-center bg-zinc-800 overflow-hidden">
+                <div class="w-[90%] sm:w-[75%] md:w-[60%] lg:w-[50%] xl:w-[45%] mb-5 sm:mb-8">
+                        <img src="/images/uploads/<%= post.postImage %>"
+                            class="w-full h-[60vw] sm:h-[45vw] lg:h-[350px] object-cover rounded-md mt-3" />
+                </div>
+            </div>
+
+            <!-- Options -->
+            <div class="px-5 py-3 flex justify-between items-center text-2xl border-t border-zinc-800">
+                <div class="flex items-center gap-5">
+                    <!-- Like -->
+                    <a href="/like/post/<%= post._id %>" class="hover:text-red-400 transition like-btn">
+                        <% if (post.likes.indexOf(user._id)===-1) { %>
+                            <i class="ri-heart-3-line"></i>
+                            <% } else { %>
+                                <i class="ri-heart-3-fill text-red-500"></i>
+                                <% } %>
+                    </a>
+
+                    <!-- Comment -->
+                    <a href="https://beeper.com" class="hover:text-sky-400 transition">
+                        <i class="ri-chat-3-line"></i>
+                    </a>
+
+                    <!-- Share -->
+                    <div class="relative">
+                        <i class="ri-share-circle-line share-btn cursor-pointer hover:text-sky-400 transition"></i>
+                        <div
+                            class="share-dialog hidden absolute -bottom-5 left-10 bg-zinc-900 border border-zinc-700 text-sm rounded-xl shadow-lg p-4 w-64 z-50">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h2 class="font-semibold text-white">Share this post</h2>
+                                    <p class="text-xs text-zinc-400 mt-1">Copy or share on socials</p>
+                                </div>
+                                <button class="close-dialog text-lg">&times;</button>
+                            </div>
+                            <div class="flex items-center gap-4 mt-4 text-xl">
+                                <i class="ri-twitter-fill hover:text-sky-400 cursor-pointer" data-link="twitter"></i>
+                                <i class="ri-linkedin-box-fill hover:text-sky-600 cursor-pointer"
+                                    data-link="linkedin"></i>
+                                <i class="ri-facebook-circle-fill hover:text-blue-500 cursor-pointer"
+                                    data-link="facebook"></i>
+                                <i class="ri-file-copy-line copy-link hover:text-green-400 cursor-pointer"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save + Delete -->
+                <div class="flex gap-5 items-center">
+                    <% if (user.savedPosts.indexOf(post._id)===-1) { %>
+                        <i data-postid="<%= post._id %>"
+                            class="save ri-bookmark-line cursor-pointer hover:text-sky-400 transition"></i>
+                        <% } else { %>
+                            <i data-postid="<%= post._id %>"
+                                class="save ri-bookmark-fill text-sky-400 cursor-pointer"></i>
+                        <% } %>
+
+                                <% if (user && String(user._id)===String(post.user._id)) { %>
+                                    <a href="/delete/<%= post._id %>" class="hover:text-red-600 transition">
+                                        <i class="ri-delete-bin-line text-red-400 cursor-pointer"></i>
+                                    </a>
+                                    <% } %>
+                </div>
+            </div>
+
+            <!-- Likes + Caption -->
+            <div class="px-5 pb-8 sm:pb-10">
+                <p class="text-sm font-semibold tracking-tight likeval">
+                    <%= post.likes.length %> likes
+                </p>
+                <p class="text-sm mt-2 leading-snug">
+                    <span class="font-semibold">
+                        <%= post.user.username %>
+                    </span>
+                    <span class="opacity-80">
+                        <%= post.caption %>
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+        integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        // Save Post
+        document.querySelectorAll('.save').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const postId = btn.dataset.postid;
+                fetch(`/save/${postId}`)
+                    .then(res => res.json())
+                    .then(() => {
+                        btn.classList.toggle('ri-bookmark-line');
+                        btn.classList.toggle('ri-bookmark-fill');
+                        btn.classList.toggle('text-sky-400');
+                    })
+                    .catch(err => console.error('Save failed:', err));
+            });
+        });
+
+        // Share Post
+        document.querySelectorAll('.share-btn').forEach(btn => {
+            const post = btn.closest('.post');
+            const dialog = post.querySelector('.share-dialog');
+            const closeBtn = dialog.querySelector('.close-dialog');
+            const copyLink = dialog.querySelector('.copy-link');
+            const socialIcons = dialog.querySelectorAll('[data-link]');
+            const baseUrl = window.location.hostname === "localhost"
+                ? "http://localhost:3000"
+                : "https://sannsta.onrender.com";
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.share-dialog').forEach(d => d.classList.add('hidden'));
+                dialog.classList.toggle('hidden');
+            });
+
+            closeBtn.addEventListener('click', () => dialog.classList.add('hidden'));
+            document.addEventListener('click', (e) => {
+                if (!dialog.contains(e.target) && e.target !== btn) dialog.classList.add('hidden');
+            });
+
+            copyLink.addEventListener('click', () => {
+                navigator.clipboard.writeText(baseUrl + window.location.pathname);
+                copyLink.classList.replace('ri-file-copy-line', 'ri-check-line');
+                copyLink.classList.add('text-green-400');
+                copyLink.style.pointerEvents = 'none';
+            });
+
+            socialIcons.forEach(icon => {
+                icon.addEventListener('click', () => {
+                    const shareUrl = encodeURIComponent(baseUrl + window.location.pathname);
+                    const title = encodeURIComponent(document.title);
+                    const links = {
+                        twitter: `https://twitter.com/intent/tweet?url=${shareUrl}&text=${title}`,
+                        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`,
+                        facebook: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
+                    };
+                    window.open(links[icon.dataset.link], "_blank");
+                });
+            });
+        });
+    </script>
+
+    <% include ./partials/footer.ejs %>

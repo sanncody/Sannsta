@@ -115,6 +115,13 @@ router.get('/save/posts', isLoggedIn, async function (req, res) {
   res.render('savedPosts', { user, footer: true });
 });
 
+router.get('/post/:postId', isLoggedIn, async function (req, res) {
+  const user = await userModel.findOne({ _id: req.session.passport.user }).populate('stories');
+  const post = await postModel.findById(req.params.postId).populate('user');
+
+  res.render('singlePost', { user, post, formatDate: dateFormatter.formatRelativeTime, footer: true });
+});
+
 router.get('/save/:postId', isLoggedIn, async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user }).populate('posts');
 
