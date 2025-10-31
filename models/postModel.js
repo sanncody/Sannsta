@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 
 const postSchema = mongoose.Schema({
-    postImage: String,
+    postImage: {
+        data: Buffer,
+        contentType: String
+    },
     caption: String,
     user: {
         type: mongoose.Schema.Types.ObjectId,
