@@ -35,13 +35,13 @@
     <div class="story px-3 flex gap-3 overflow-auto mt-5 md:justify-center">
       <% if (stories.length> 0) { %>
         <% stories.forEach(story=> { %>
-          <a href="/story/<%= story.user.username %>">
+          <a href="/story/<%= story.user?.username %>">
             <div class="rotating-ring circle flex-shrink-0 relative w-[18vw] h-[18vw] md:w-[90px] md:h-[90px]">
               <div class="ring-border absolute inset-0 rounded-full"
                 style="background: conic-gradient(from 0deg, #8b5cf6, #ec4899, #f97316, #8b5cf6); padding: 3px;">
               </div>
               <div class="absolute inset-[3px] rounded-full overflow-hidden bg-black">
-                <img class="w-full h-full object-cover object-top" src="/images/uploads/<%= story.user.profileImage %>"
+                <img class="w-full h-full object-cover object-top" src="data:<%= story.user?.profileImage.contentType %>;base64,<%= story.user?.profileImage.data?.toString('base64') %>"
                   alt="">
               </div>
             </div>
@@ -57,21 +57,21 @@
           <div
             class="post w-full bg-[#1F1F1F] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
             <div class="title px-4 pt-4 flex items-center gap-3">
-              <a href="/story/<%= post.user.username %>">
+              <a href="/story/<%= post.user?.username %>">
                 <div class="rotating-ring relative w-12 h-12 flex-shrink-0">
                   <div class="ring-border absolute inset-0 rounded-full"
                     style="background: conic-gradient(from 0deg, #8b5cf6, #ec4899, #f97316, #8b5cf6); padding: 2px;">
                   </div>
                   <div class="absolute inset-[2px] rounded-full overflow-hidden bg-black">
-                    <img src="/images/uploads/<%= post.user.profileImage %>" alt=""
+                    <img src="data:<%= post.user?.profileImage.contentType %>;base64,<%= post.user?.profileImage.data?.toString('base64') %>" alt=""
                       class="w-full h-full rounded-full object-cover">
                   </div>
                 </div>
               </a>
               <div>
-                <a href="/profile/<%= post.user.username %>">
+                <a href="/profile/<%= post.user?.username %>">
                   <h4 class="text-sm md:text-base font-semibold cursor-pointer">
-                    <%= post.user.username %>
+                    <%= post.user?.username %>
                   </h4>
                 </a>
                 <h6 class="text-xs opacity-50">
@@ -82,7 +82,7 @@
 
             <!-- Post Image -->
             <div class="relative w-full h-[60vw] sm:h-[45vw] lg:h-[350px] mt-3 bg-sky-100 overflow-hidden">
-              <img data-postid="<%= post._id %>" src="/images/uploads/<%= post.postImage %>" alt=""
+              <img data-postid="<%= post._id %>" src="data:<%= post.postImage.contentType %>;base64,<%= post.postImage.data?.toString('base64') %>" alt=""
                 class="postimg w-full h-full object-cover">
             </div>
 
@@ -130,7 +130,7 @@
                   <% } else { %>
                     <i data-postid="<%= post._id %>" class="save ri-bookmark-fill text-zinc-100 cursor-pointer"></i>
                     <% } %>
-                      <% if (user && String(user._id)===String(post.user._id)) { %>
+                      <% if (user && String(user?._id)===String(post.user?._id)) { %>
                         <a href="/delete/<%= post._id %>">
                           <i class="text-red-400 hover:text-red-600 ri-delete-bin-line cursor-pointer"></i>
                         </a>
@@ -147,7 +147,7 @@
             </a>
             <h2 class="text-white font-light text-sm mt-2 px-4 pb-4">
               <span class="font-semibold pr-1">
-                <%= post.user.username %>
+                <%= post.user?.username %>
               </span>
               <%= post.caption %>
             </h2>

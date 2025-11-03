@@ -17,7 +17,7 @@
       <div class="flex flex-col items-center gap-3 mt-10">
         <div
           class="image w-[25vw] h-[25vw] md:w-[8vw] md:h-[8vw] bg-sky-100 rounded-full overflow-hidden border border-zinc-700">
-          <img src="/images/uploads/<%= user.profileImage %>" alt="profile" class="w-full h-full object-cover">
+          <img src="data:<%= user.profileImage.contentType %>;base64,<%= user.profileImage.data?.toString('base64') %>" alt="profile" class="w-full h-full object-cover">
         </div>
         <button id="edit-btn" class="text-blue-500 capitalize hover:text-blue-400 transition">
           edit picture

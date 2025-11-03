@@ -27,7 +27,7 @@
 
         <!-- User Info -->
         <a href="/profile/<%= user.username %>" class="absolute top-14 left-4 flex items-center gap-3 z-20">
-            <img src="/images/uploads/<%= user.profileImage %>"
+            <img src="data:<%= user.profileImage.contentType %>;base64,<%= user.profileImage.data?.toString('base64') %>"
                 class="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover" alt="user">
             <span class="text-[#dadada] font-semibold capitalize text-lg sm:text-xl tracking-tight">
                 <%= user.username %>

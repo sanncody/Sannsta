@@ -30,7 +30,7 @@
 
                                 <!-- Post Image -->
                                 <div class="relative w-full aspect-square bg-zinc-700 overflow-hidden">
-                                    <img src="/images/uploads/<%= post.postImage %>" alt="Saved Post"
+                                    <img src="data:<%= post.postImage.contentType %>;base64,<%= post.postImage.data?.toString('base64') %>" alt="Saved Post"
                                         class="w-full h-full object-cover rounded-t-xl">
 
                                     <!-- Unsave Icon -->
