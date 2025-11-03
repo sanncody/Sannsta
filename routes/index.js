@@ -26,7 +26,7 @@ router.get('/login', function (req, res) {
 
 router.get('/feed', isLoggedIn, async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
-  console.log(user);
+
   if (!user) res.redirect('/login');
 
   const posts = await postModel.find().limit(30).populate('user');
@@ -344,10 +344,9 @@ router.get('/user/:id', isLoggedIn, async (req, res) => {
     // 4️⃣ Finally delete the user itself
     await userModel.findByIdAndDelete(userId);
 
-    res.status(200).json({ message: 'User and related data deleted successfully' });
+    res.redirect('/');
   } catch (error) {
     console.error("Error deleting user:", error);
-    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
