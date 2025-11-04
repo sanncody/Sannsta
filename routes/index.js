@@ -47,7 +47,13 @@ router.get('/story/add', isLoggedIn, async function (req, res) {
 
 router.get('/story/:username', async function (req, res) {
   const user = await userModel.findOne({ username: req.params.username }).populate('stories');
-  res.render('story', { user, footer: false });
+
+  const stories = await storyModel.find().populate("user");
+
+  const uniqueStories = stories.filter((story, index, self) =>
+    index === self.findIndex(s => s.user?._id.toString() === story.user?._id.toString())
+  );
+  res.render('story', { user, stories: uniqueStories, formatDate: dateFormatter.formatRelativeTime, footer: false });
 });
 
 router.get('/profile', isLoggedIn, async function (req, res) {

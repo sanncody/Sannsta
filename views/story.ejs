@@ -4,7 +4,7 @@
 
         <!-- Progress Bars -->
         <div class="absolute top-5 left-4 right-4 flex gap-1 z-20 max-w-3xl mx-auto">
-            <% if (user.stories && user.stories.length > 0) { %>
+            <% if (user.stories && user.stories.length> 0) { %>
                 <% user.stories.forEach((story, index)=> { %>
                     <div class="flex-1 h-[3px] bg-gray-700 rounded-full overflow-hidden">
                         <div id="bar-<%= index %>" class="w-0 h-full bg-white"></div>
@@ -26,34 +26,40 @@
         </button>
 
         <!-- User Info -->
-        <a href="/profile/<%= user.username %>" class="absolute top-14 left-4 flex items-center gap-3 z-20">
-            <img src="data:<%= user.profileImage.contentType %>;base64,<%= user.profileImage.data?.toString('base64') %>"
-                class="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover" alt="user">
-            <span class="text-[#dadada] font-semibold capitalize text-lg sm:text-xl tracking-tight">
-                <%= user.username %>
-            </span>
-        </a>
-
-
-        <!-- Story Images + Navigation -->
-        <% user.stories.forEach((story, index)=> { %>
-            <div class="story-container w-full h-full flex items-center justify-center">
-                <img src="data:<%= story.story.contentType %>;base64,<%= story.story.data?.toString('base64') %>" id="story-<%= index %>" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-               w-[90%] sm:w-[60%] h-full object-contain sm:object-cover rounded-lg
-               transition-opacity duration-500 <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" alt="story">
-            </div>
+        <% stories.forEach((story)=> { %>
+            <a href="/profile/<%= story.user.username %>" class="absolute top-14 left-4 flex items-center gap-3 z-20 justify-center">
+                <img src="data:<%= story.user.profileImage.contentType %>;base64,<%= story.user.profileImage.data?.toString('base64') %>"
+                    class="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover" alt="user">
+                <span class="text-[#dadada] font-semibold capitalize text-lg sm:text-xl tracking-tight">
+                    <%= story.user.username %>
+                </span>
+                <h6 class="text-md opacity-50 text-[#dadada]">
+                    <%= formatDate(new Date(story.createdAt)) %>
+                </h6>
+            </a>
             <% }) %>
 
-                <!-- Navigation Buttons -->
-                <button id="prevBtn"
-                    class="absolute left-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
-                    <i class="ri-arrow-left-circle-line"></i>
-                </button>
 
-                <button id="nextBtn"
-                    class="absolute right-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
-                    <i class="ri-arrow-right-circle-line"></i>
-                </button>
+                <!-- Story Images + Navigation -->
+                <% user.stories.forEach((story, index)=> { %>
+                    <div class="story-container w-full h-full flex items-center justify-center">
+                        <img src="data:<%= story.story.contentType %>;base64,<%= story.story.data?.toString('base64') %>"
+                            id="story-<%= index %>" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+               w-[90%] sm:w-[60%] h-full object-contain sm:object-cover rounded-lg
+               transition-opacity duration-500 <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" alt="story">
+                    </div>
+                    <% }) %>
+
+                        <!-- Navigation Buttons -->
+                        <button id="prevBtn"
+                            class="absolute left-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
+                            <i class="ri-arrow-left-circle-line"></i>
+                        </button>
+
+                        <button id="nextBtn"
+                            class="absolute right-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
+                            <i class="ri-arrow-right-circle-line"></i>
+                        </button>
     </div>
 
     <script>
