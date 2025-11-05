@@ -31,7 +31,7 @@
                                 <!-- Post Image -->
                                 <div class="relative w-full aspect-square bg-zinc-700 overflow-hidden">
                                     <img src="data:<%= post.postImage.contentType %>;base64,<%= post.postImage.data?.toString('base64') %>" alt="Saved Post"
-                                        class="w-full h-full object-cover rounded-t-xl">
+                                        class="w-full h-full object-contain rounded-t-xl">
 
                                     <!-- Unsave Icon -->
                                     <i class="unsave-btn ri-bookmark-fill absolute top-2 right-2 text-2xl text-red-600 hover:text-red-500 cursor-pointer transition"
@@ -70,7 +70,10 @@
                             const card = btn.closest('.bg-zinc-900');
                             if (card) {
                                 card.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-300');
-                                setTimeout(() => card.remove(), 300);
+                                setTimeout(() => {
+                                    car.remove();
+                                    res.redirected('/save/posts')
+                                }, 300);
                             }
                         }
                     } catch (err) {

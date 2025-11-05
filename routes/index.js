@@ -66,14 +66,19 @@ router.get('/profile', isLoggedIn, async function (req, res) {
 
 router.get('/profile/:username', isLoggedIn, async function (req, res) {
   const user = await userModel.findOne({ _id: req.session.passport.user });
-
+  
   if (user.username === req.params.username) {
     res.redirect('/profile');
   }
-
+  
   let userProfile = await userModel.findOne({ username: req.params.username }).populate("posts");
-
+  
   res.render('userProfile', { user, userProfile, footer: true });
+});
+
+router.get('/profilePic/:username', isLoggedIn, async function (req, res) {
+  const user = await userModel.findOne({ username: req.params.username });
+  res.render('profilePic', { user, footer: false });
 });
 
 /**
@@ -316,6 +321,30 @@ router.get('/delete/:postId', isLoggedIn, async function (req, res) {
 
   res.redirect('/feed');
 
+});
+
+
+router.get('/delete/story/:storyId', isLoggedIn, async function (req, res) {
+  const user = await userModel.findOne({ _id: req.session.passport.user });
+
+  // Find the story first
+  const story = await storyModel.findById(req.params.storyId);
+
+  if (!story) {
+    return res.status(404).json({ message: "Story not found" });
+  }
+
+  if (story.user._id.toString() !== user._id.toString()) {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
+
+  // Delete Story
+  await storyModel.findByIdAndDelete(req.params.storyId);
+
+  // Remove from user's delete list
+  await userModel.findByIdAndUpdate(user._id, { $pull: { stories: story._id } });
+
+  res.redirect('/feed');
 });
 
 router.get('/logout', function (req, res, next) {

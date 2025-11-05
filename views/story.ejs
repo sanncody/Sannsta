@@ -18,48 +18,72 @@
                             </div>
                             <% } %>
         </div>
+        <div class="absolute top-5 right-5 flex items-center gap-4 z-30">
+            <!-- 3 Dots Menu -->
+            <div class="relative">
+                <button id="optionsBtn" class="text-white text-2xl sm:text-3xl hover:text-gray-300 transition absolute top-5 right-14"
+                    onclick="toggleMenu(event)">
+                    <i class="ri-more-2-line"></i>
+                </button>
 
-        <!-- Close Button -->
-        <button onclick="window.history.back()"
-            class="absolute top-5 right-5 text-white text-3xl z-20 hover:text-gray-300 transition">
-            <i class="ri-close-line"></i>
-        </button>
+                <!-- Dropdown Menu -->
+                <div id="optionsMenu"
+                    class="hidden absolute top-16 right-0 mt-2 w-36 bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+                    <% if (stories.length > 0) { %>
+                        <% stories.forEach(story => { %>
+                            <a href="/delete/story/<%= story._id %>" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 transition">
+                                <i class="ri-delete-bin-6-line mr-2"></i> Delete Story
+                            </a>
+                        <% }) %>
+                    <% } %>
+                </div>
+                <!-- Close Button -->
+                <button onclick="window.history.back()"
+                    class="absolute top-5 right-5 text-white text-3xl z-20 hover:text-gray-300 transition">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+        </div>
 
         <!-- User Info -->
-        <% stories.forEach((story)=> { %>
-            <a href="/profile/<%= story.user.username %>" class="absolute top-14 left-4 flex items-center gap-3 z-20 justify-center">
-                <img src="data:<%= story.user.profileImage.contentType %>;base64,<%= story.user.profileImage.data?.toString('base64') %>"
-                    class="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover" alt="user">
-                <span class="text-[#dadada] font-semibold capitalize text-lg sm:text-xl tracking-tight">
-                    <%= story.user.username %>
-                </span>
-                <h6 class="text-md opacity-50 text-[#dadada]">
-                    <%= formatDate(new Date(story.createdAt)) %>
-                </h6>
-            </a>
-            <% }) %>
+        <% if (stories.length> 0) { %>
+            <% stories.forEach((story)=> { %>
+                <a href="/profile/<%= user.username %>"
+                    class="absolute top-14 left-4 flex items-center gap-3 z-20 justify-center">
+                    <img src="data:<%= user.profileImage.contentType %>;base64,<%= user.profileImage.data?.toString('base64') %>"
+                        class="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover" alt="user">
+                    <span class="text-[#dadada] font-semibold capitalize text-lg sm:text-xl tracking-tight">
+                        <%= user.username %>
+                    </span>
+                    <h6 class="text-md opacity-50 text-[#dadada]">
+                        <%= formatDate(new Date(story.createdAt)) %>
+                    </h6>
+                </a>
+                <% }) %>
+                    <% } %>
 
 
-                <!-- Story Images + Navigation -->
-                <% user.stories.forEach((story, index)=> { %>
-                    <div class="story-container w-full h-full flex items-center justify-center">
-                        <img src="data:<%= story.story.contentType %>;base64,<%= story.story.data?.toString('base64') %>"
-                            id="story-<%= index %>" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-               w-[90%] sm:w-[60%] h-full object-contain sm:object-cover rounded-lg
+                        <!-- Story Images + Navigation -->
+                        <% user.stories.forEach((story, index)=> { %>
+                            <div class="story-container w-full h-full flex items-center justify-center">
+                                <img src="data:<%= story.story.contentType %>;base64,<%= story.story.data?.toString('base64') %>"
+                                    id="story-<%= index %>" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+               w-[90%] sm:w-[60%] h-full object-contain rounded-lg
                transition-opacity duration-500 <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" alt="story">
-                    </div>
-                    <% }) %>
+                            </div>
+                            <% }) %>
 
-                        <!-- Navigation Buttons -->
-                        <button id="prevBtn"
-                            class="absolute left-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
-                            <i class="ri-arrow-left-circle-line"></i>
-                        </button>
+                                <!-- Navigation Buttons -->
+                                <button id="prevBtn"
+                                    class="absolute left-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
+                                    <i class="ri-arrow-left-circle-line"></i>
+                                </button>
 
-                        <button id="nextBtn"
-                            class="absolute right-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
-                            <i class="ri-arrow-right-circle-line"></i>
-                        </button>
+                                <button id="nextBtn"
+                                    class="absolute right-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
+                                    <i class="ri-arrow-right-circle-line"></i>
+                                </button>
     </div>
 
     <script>
@@ -125,6 +149,20 @@
 
         // Start story view
         if (stories.length > 0) showStory(current);
+
+        function toggleMenu(event) {
+                event.stopPropagation();
+                const menu = document.getElementById("optionsMenu");
+                menu.classList.toggle("hidden");
+            }
+
+            // Close menu if clicked outside
+            window.addEventListener("click", () => {
+                const menu = document.getElementById("optionsMenu");
+                if (!menu.classList.contains("hidden")) {
+                    menu.classList.add("hidden");
+                }
+            });
     </script>
 
     <% include ./partials/footer.ejs %>
