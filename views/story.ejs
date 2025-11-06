@@ -21,21 +21,19 @@
         <div class="absolute top-5 right-5 flex items-center gap-4 z-30">
             <!-- 3 Dots Menu -->
             <div class="relative">
-                <button id="optionsBtn" class="text-white text-2xl sm:text-3xl hover:text-gray-300 transition absolute top-5 right-14"
+                <button id="optionsBtn"
+                    class="text-white text-2xl sm:text-3xl hover:text-gray-300 transition absolute top-5 right-16"
                     onclick="toggleMenu(event)">
-                    <i class="ri-more-2-line"></i>
+                    <i class="ri-more-fill"></i>
                 </button>
 
                 <!-- Dropdown Menu -->
                 <div id="optionsMenu"
-                    class="hidden absolute top-16 right-0 mt-2 w-36 bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
-                    <% if (stories.length > 0) { %>
-                        <% stories.forEach(story => { %>
-                            <a href="/delete/story/<%= story._id %>" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 transition">
-                                <i class="ri-delete-bin-6-line mr-2"></i> Delete Story
-                            </a>
-                        <% }) %>
-                    <% } %>
+                    class="hidden absolute top-16 right-5 mt-2 w-36 bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+                    <a href="/delete/story/<%= user.username %>/<%= story._id %>" id="deleteStoryLink"
+                        class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 transition">
+                        <i class="ri-delete-bin-6-line mr-2"></i> Delete Story
+                    </a>
                 </div>
                 <!-- Close Button -->
                 <button onclick="window.history.back()"
@@ -91,19 +89,26 @@
         const bars = document.querySelectorAll('[id^="bar-"]');
         const nextBtn = document.getElementById('nextBtn');
         const prevBtn = document.getElementById('prevBtn');
+        const deleteLink = document.getElementById('deleteStoryLink');
+
         let current = 0;
         const duration = 5000;
         let timer;
 
+        const storyIds = `<%- user.stories.map(s => s._id) %>`;
+        const username = "<%= user.username %>";
+        function updateDeleteLink() {
+            deleteLink.href = `/delete/story/${username}/${storyIds.split(',')[current]}`;
+            // window.location.href = 
+        }
+
         function showStory(index) {
             if (index < 0 || index >= stories.length) return;
 
-            // Reset current story
             stories.forEach((story, i) => {
                 story.style.opacity = i === index ? '1' : '0';
             });
 
-            // Update progress bars
             bars.forEach((bar, i) => {
                 bar.style.transition = 'none';
                 bar.style.width = i < index ? '100%' : '0%';
@@ -114,10 +119,10 @@
                 bars[index].style.width = '100%';
             }, 50);
 
-            // Clear previous timer
             clearTimeout(timer);
 
-            // Auto move to next story
+            updateDeleteLink();
+
             timer = setTimeout(() => {
                 if (index < stories.length - 1) {
                     current++;
@@ -128,7 +133,6 @@
             }, duration);
         }
 
-        // Navigation buttons
         nextBtn.addEventListener('click', () => {
             clearTimeout(timer);
             if (current < stories.length - 1) {
@@ -147,22 +151,21 @@
             }
         });
 
-        // Start story view
         if (stories.length > 0) showStory(current);
 
         function toggleMenu(event) {
-                event.stopPropagation();
-                const menu = document.getElementById("optionsMenu");
-                menu.classList.toggle("hidden");
-            }
+            event.stopPropagation();
+            const menu = document.getElementById("optionsMenu");
+            menu.classList.toggle("hidden");
+        }
 
-            // Close menu if clicked outside
-            window.addEventListener("click", () => {
-                const menu = document.getElementById("optionsMenu");
-                if (!menu.classList.contains("hidden")) {
-                    menu.classList.add("hidden");
-                }
-            });
+        window.addEventListener("click", () => {
+            const menu = document.getElementById("optionsMenu");
+            if (!menu.classList.contains("hidden")) {
+                menu.classList.add("hidden");
+            }
+        });
     </script>
+
 
     <% include ./partials/footer.ejs %>
