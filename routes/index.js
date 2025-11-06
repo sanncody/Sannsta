@@ -46,6 +46,8 @@ router.get('/story/add', isLoggedIn, async function (req, res) {
 });
 
 router.get('/story/:username/:storyId', async function (req, res) {
+  const loggedInUser = await userModel.findOne({ _id: req.session.passport.user });
+
   const user = await userModel.findOne({ username: req.params.username }).populate('stories');
 
   const story = await storyModel.findById(req.params.storyId).populate('user');
@@ -54,7 +56,7 @@ router.get('/story/:username/:storyId', async function (req, res) {
   const uniqueStories = stories.filter((story, index, self) =>
     index === self.findIndex(s => s.user?._id.toString() === story.user?._id.toString())
   );
-  res.render('story', { user, story, stories: uniqueStories, formatDate: dateFormatter.formatRelativeTime, footer: false });
+  res.render('story', { loggedInUser, user, story, stories: uniqueStories, formatDate: dateFormatter.formatRelativeTime, footer: false });
 });
 
 router.get('/profile', isLoggedIn, async function (req, res) {
@@ -326,7 +328,11 @@ router.get('/delete/:postId', isLoggedIn, async function (req, res) {
 
 
 router.get('/delete/story/:username/:storyId', isLoggedIn, async function (req, res) {
-  const user = await userModel.findOne({ username: req.params.username });
+  const user = await userModel.findOne({ _id: req.session.passport.user });
+
+  if (user.username !== req.params.username) {
+    return res.status(404).json({ message: "User not found" });
+  }
 
   // Find the story first
   const story = await storyModel.findById(req.params.storyId);

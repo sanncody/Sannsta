@@ -21,25 +21,27 @@
         <div class="absolute top-5 right-5 flex items-center gap-4 z-30">
             <!-- 3 Dots Menu -->
             <div class="relative">
-                <button id="optionsBtn"
-                    class="text-white text-2xl sm:text-3xl hover:text-gray-300 transition absolute top-5 right-16"
-                    onclick="toggleMenu(event)">
-                    <i class="ri-more-fill"></i>
-                </button>
+                <% if (loggedInUser && String(loggedInUser._id)===String(story.user._id)) { %>
+                    <button id="optionsBtn"
+                        class="text-white text-2xl sm:text-3xl hover:text-gray-300 transition absolute top-5 right-16"
+                        onclick="toggleMenu(event)">
+                        <i class="ri-more-fill"></i>
+                    </button>
+                    <% } %>
 
-                <!-- Dropdown Menu -->
-                <div id="optionsMenu"
-                    class="hidden absolute top-16 right-5 mt-2 w-36 bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
-                    <a href="/delete/story/<%= user.username %>/<%= story._id %>" id="deleteStoryLink"
-                        class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 transition">
-                        <i class="ri-delete-bin-6-line mr-2"></i> Delete Story
-                    </a>
-                </div>
-                <!-- Close Button -->
-                <button onclick="window.history.back()"
-                    class="absolute top-5 right-5 text-white text-3xl z-20 hover:text-gray-300 transition">
-                    <i class="ri-close-line"></i>
-                </button>
+                        <!-- Dropdown Menu -->
+                        <div id="optionsMenu"
+                            class="hidden absolute top-16 right-5 mt-2 w-36 bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+                            <a href="/delete/story/<%= user.username %>/<%= story._id %>" id="deleteStoryLink"
+                                class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 transition">
+                                <i class="ri-delete-bin-6-line mr-2"></i> Delete Story
+                            </a>
+                        </div>
+                        <!-- Close Button -->
+                        <button onclick="window.history.back()"
+                            class="absolute top-5 right-5 text-white text-3xl z-20 hover:text-gray-300 transition">
+                            <i class="ri-close-line"></i>
+                        </button>
             </div>
 
         </div>
@@ -52,19 +54,20 @@
                 <span class="text-[#dadada] font-semibold capitalize text-lg sm:text-xl tracking-tight">
                     <%= user.username %>
                 </span>
-        
+
                 <% user.stories.forEach((story, index)=> { %>
                     <h6 class="story-time text-md opacity-50 text-[#dadada] z-10 hidden" data-index="<%= index %>">
                         <%= formatDate(new Date(story.createdAt)) %>
                     </h6>
                     <% }) %>
             </div>
-        
+
             <!-- Your story progress bars -->
             <div class="progress-container flex gap-2 mt-2">
                 <% user.stories.forEach((story, index)=> { %>
                     <div class="progress-bar h-1 bg-gray-600 rounded-full w-full overflow-hidden">
-                        <div class="progress-inner h-full bg-white transition-all duration-500" data-index="<%= index %>"></div>
+                        <div class="progress-inner h-full bg-white transition-all duration-500"
+                            data-index="<%= index %>"></div>
                     </div>
                     <% }) %>
             </div>
