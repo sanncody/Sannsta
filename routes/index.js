@@ -296,7 +296,7 @@ router.post('/story/upload', isLoggedIn, upload.single('story'), async function 
 
   await user.save();
 
-  res.redirect(`/story/${user.username}`);
+  res.redirect(`/story/${user.username}/${story._id}`);
 });
 
 router.get('/delete/:postId', isLoggedIn, async function (req, res) {
