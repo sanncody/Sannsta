@@ -45,43 +45,52 @@
         </div>
 
         <!-- User Info -->
-        <% if (stories.length> 0) { %>
-            <% stories.forEach((story)=> { %>
-                <a href="/profile/<%= user.username %>"
-                    class="absolute top-14 left-4 flex items-center gap-3 z-20 justify-center">
-                    <img src="data:<%= user.profileImage.contentType %>;base64,<%= user.profileImage.data?.toString('base64') %>"
-                        class="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover" alt="user">
-                    <span class="text-[#dadada] font-semibold capitalize text-lg sm:text-xl tracking-tight">
-                        <%= user.username %>
-                    </span>
-                    <h6 class="text-md opacity-50 text-[#dadada]">
+        <div class="story-container">
+            <div class="absolute top-14 left-4 flex items-center gap-3 z-20 justify-center">
+                <img src="data:<%= user.profileImage.contentType %>;base64,<%= user.profileImage.data?.toString('base64') %>"
+                    class="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover" alt="user">
+                <span class="text-[#dadada] font-semibold capitalize text-lg sm:text-xl tracking-tight">
+                    <%= user.username %>
+                </span>
+        
+                <% user.stories.forEach((story, index)=> { %>
+                    <h6 class="story-time text-md opacity-50 text-[#dadada] z-10 hidden" data-index="<%= index %>">
                         <%= formatDate(new Date(story.createdAt)) %>
                     </h6>
-                </a>
-                <% }) %>
-                    <% } %>
+                    <% }) %>
+            </div>
+        
+            <!-- Your story progress bars -->
+            <div class="progress-container flex gap-2 mt-2">
+                <% user.stories.forEach((story, index)=> { %>
+                    <div class="progress-bar h-1 bg-gray-600 rounded-full w-full overflow-hidden">
+                        <div class="progress-inner h-full bg-white transition-all duration-500" data-index="<%= index %>"></div>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
 
 
-                        <!-- Story Images + Navigation -->
-                        <% user.stories.forEach((story, index)=> { %>
-                            <div class="story-container w-full h-full flex items-center justify-center">
-                                <img src="data:<%= story.story.contentType %>;base64,<%= story.story.data?.toString('base64') %>"
-                                    id="story-<%= index %>" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+        <!-- Story Images + Navigation -->
+        <% user.stories.forEach((story, index)=> { %>
+            <div class="story-container w-full h-full flex items-center justify-center">
+                <img src="data:<%= story.story.contentType %>;base64,<%= story.story.data?.toString('base64') %>"
+                    id="story-<%= index %>" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                w-[90%] sm:w-[60%] h-full object-contain rounded-lg
                transition-opacity duration-500 <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" alt="story">
-                            </div>
-                            <% }) %>
+            </div>
+            <% }) %>
 
-                                <!-- Navigation Buttons -->
-                                <button id="prevBtn"
-                                    class="absolute left-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
-                                    <i class="ri-arrow-left-circle-line"></i>
-                                </button>
+                <!-- Navigation Buttons -->
+                <button id="prevBtn"
+                    class="absolute left-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
+                    <i class="ri-arrow-left-circle-line"></i>
+                </button>
 
-                                <button id="nextBtn"
-                                    class="absolute right-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
-                                    <i class="ri-arrow-right-circle-line"></i>
-                                </button>
+                <button id="nextBtn"
+                    class="absolute right-5 text-3xl text-white opacity-60 hover:opacity-100 transition z-20">
+                    <i class="ri-arrow-right-circle-line"></i>
+                </button>
     </div>
 
     <script>
@@ -90,6 +99,7 @@
         const nextBtn = document.getElementById('nextBtn');
         const prevBtn = document.getElementById('prevBtn');
         const deleteLink = document.getElementById('deleteStoryLink');
+        const storyTimes = document.querySelectorAll(".story-time"); // story createdAt labels
 
         let current = 0;
         const duration = 5000;
@@ -97,32 +107,46 @@
 
         const storyIds = `<%- user.stories.map(s => s._id) %>`;
         const username = "<%= user.username %>";
+
+        // Update delete link for current story
         function updateDeleteLink() {
             deleteLink.href = `/delete/story/${username}/${storyIds.split(',')[current]}`;
-            // window.location.href = 
         }
 
+        // Show current story time label
+        function updateStoryTime(index) {
+            storyTimes.forEach((time, i) => {
+                time.classList.toggle("hidden", i !== index);
+            });
+        }
+
+        // Main story display + bar animation
         function showStory(index) {
             if (index < 0 || index >= stories.length) return;
 
+            // Show the correct story image
             stories.forEach((story, i) => {
                 story.style.opacity = i === index ? '1' : '0';
             });
 
+            // Reset all progress bars
             bars.forEach((bar, i) => {
                 bar.style.transition = 'none';
                 bar.style.width = i < index ? '100%' : '0%';
             });
 
+            // Animate current progress bar
             setTimeout(() => {
                 bars[index].style.transition = `width ${duration / 1000}s linear`;
                 bars[index].style.width = '100%';
             }, 50);
 
-            clearTimeout(timer);
-
+            // Update delete link + story time
             updateDeleteLink();
+            updateStoryTime(index);
 
+            // Clear old timer and start new one
+            clearTimeout(timer);
             timer = setTimeout(() => {
                 if (index < stories.length - 1) {
                     current++;
@@ -133,6 +157,7 @@
             }, duration);
         }
 
+        // Next / Prev controls
         nextBtn.addEventListener('click', () => {
             clearTimeout(timer);
             if (current < stories.length - 1) {
@@ -151,8 +176,10 @@
             }
         });
 
+        // Initialize
         if (stories.length > 0) showStory(current);
 
+        // Options menu toggle logic
         function toggleMenu(event) {
             event.stopPropagation();
             const menu = document.getElementById("optionsMenu");
@@ -166,6 +193,7 @@
             }
         });
     </script>
+
 
 
     <% include ./partials/footer.ejs %>
